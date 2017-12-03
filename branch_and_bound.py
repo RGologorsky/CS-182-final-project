@@ -11,6 +11,36 @@ from cost_dicts import *
 # pair cost is the cost of taking class2 given we took class1 in the past.
 # so pair_costs["cs50]["cs51"] = cost of taking cs51 given we already took cs50
 
+# requirements implemented as lists with number from the set needed to fulfill conc. req)
+requirements = {
+    'software': (["CS50", "CS51", "CS61"], 2), 
+    'theory1': (["CS121"], 1), 
+    'theory2': (["CS124", "AM107"], 1)
+    }
+# computing the pair costs: for each class, go through the future classes and
+# apply the cost for having taken the sequence class -> future class.
+
+def fulfill(assignment):
+    req = copy.deepcopy(requirements)
+    for course in assignment:
+        if len(course) > 0:
+            course = course[0].upper()
+            used = False
+            for cat in req:
+                reqs = req[cat]
+                if course in reqs[0] and reqs[1] > 0:
+                    used = True
+                    reqs[0].remove(course)
+                    num_left = reqs[1] - 1
+                    req[cat] = (reqs[0], num_left)
+                if used == True:
+                    continue
+    fulfilled = True
+    for cat in req:
+        if req[cat][1] != 0:
+            fulfilled = False
+            break
+    return fulfilled
 
 # computing the pair costs: for each class, go through the future classes and
 # apply the cost for having taken the sequence class -> future class.
