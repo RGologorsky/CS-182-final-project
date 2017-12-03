@@ -5,7 +5,7 @@ from copy import deepcopy
 
 # returns True with probability p
 def coin_flip(p):
-    return random.random() <= p
+    return random() <= p
 
 def get_mutation_index(assignment):
     semester_index = randint(0, 4)
@@ -15,7 +15,7 @@ def get_mutation_index(assignment):
 
 def pick_course(domain):
     return choice(domain)
-    
+
 # A state is a list of value indices.
 # Randomly picks value indices until the weight limit is reached
 def get_random_successor(assignment, domain):
