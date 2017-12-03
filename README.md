@@ -2,6 +2,18 @@
 
 ### Rachel Gologorsky & Megan Ross
 
+# DONE
+- Parser (Rachel)
+
+# TODO
+
+- Pre-Req Dictionary (Megan)
+- Add normalized Q-Score and Workload columns (Megan)
+- Optional, way later: interactive user weight input parser (Megan)
+
+- greedy local search (Rachel)
+- simulated annealing (Rachel)
+
 # Files
 
 ## printing: 
