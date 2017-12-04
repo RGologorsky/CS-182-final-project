@@ -1,3 +1,7 @@
+# constants
+MAX_COST = 1000
+
+# courses dictionary
 courses = {'AM106': {'COURSE': 'AM106',
            'DAYS': set(['M', 'W']),
            'END': 1559,
@@ -249,5 +253,56 @@ courses = {'AM106': {'COURSE': 'AM106',
               'SEMESTER': 'S',
               'START': 1300}}
 
-print courses["CS181"]
-print courses["STAT121B"]
+
+# To ensure positive total costs: pre-req cost reduction < cost of taking class
+# i.e. class gets easier with pre-reqs but always is a positive amount of work.
+
+
+# individual cost of taking a course = "workload"
+indiv_costs = {
+    "cs50": 10,
+    "cs51": 10,
+    "cs121": 5,
+    "cs124": 50,
+    "am107": 5,
+}
+
+
+# pair cost is the cost of taking class2 given we took class1 in the past.
+# so pair_costs["cs50]["cs51"] = cost of taking cs51 given we already took cs50
+# pair_cost < 0 for prereqs: taking the pre-req makes the class easier.
+# taking a class twice is forbidden, so pair_costs[class1][clas1] = MAX_COST. 
+
+# NOTE - DO NOT FACTOR IN CO-REQUISITES, ANT-REQUISITES: ONLY PRE-REQUISITES
+pair_costs = {
+    "cs50": {
+             "cs50": MAX_COST, 
+             "cs51": -2, 
+             "cs121": -1, 
+             "cs124": -10
+            },
+    "cs51": {
+             "cs50": -1, 
+             "cs51": MAX_COST, 
+             "cs121": -1, 
+             "cs124": -5
+            },
+    "cs121": {
+               "cs50": -2, 
+               "cs51": -1, 
+               "cs121": MAX_COST, 
+               "cs124": -10
+             },
+    "cs124": {
+               "cs50": -10, 
+               "cs51": -10,
+               "cs121": -5, 
+               "cs124": MAX_COST
+             },
+    "am107": {
+               "am107": MAX_COST, 
+               "cs124": -10
+             },
+}
+
+

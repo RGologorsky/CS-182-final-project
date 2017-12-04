@@ -2,7 +2,7 @@ import csv
 from pprint import *
 
 # TO DO: NORMALIZE SPREADSHEET
-courses = dict()
+courses_ha = dict()
 
 # converts "130PM" -> 1330, etc.
 
@@ -33,29 +33,6 @@ def get_courses_dict():
             course = row["COURSE"]
             courses[course] = row
 
-get_courses_dict()
-pprint(courses)
-
-def overlap(course1, course2):
-
-    if courses[course1]["SEMESTER"] != courses[course2]["SEMESTER"]:
-        return False
-
-    days1 = courses[course1]["DAYS"]
-    days2 = courses[course2]["DAYS"]
-
-    # handles when no days: overlap is 0
-    if len(days1 & days2) == 0:
-        return False
-
-    start1 = courses[course1]["START"]
-    end1   = courses[course1]["END"]
-
-    start2 = courses[course2]["START"]
-    end2   = courses[course2]["END"]
-
-    # class 1 first or class 2 first
-    return (start1 < start2 and end1 < start2) or \
-            (start2 < start1 and end2 < start1)
-
+# get_courses_dict()
+# pprint(courses)
 

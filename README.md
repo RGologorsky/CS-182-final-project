@@ -9,6 +9,7 @@
 
 - Pre-Req Dictionary (Megan)
 - Add normalized Q-Score and Workload columns (Megan)
+- Add ES153/Physics 123 (they fulfill breadth)
 - Optional, way later: interactive user weight input parser (Megan)
 
 - greedy local search (Rachel)
