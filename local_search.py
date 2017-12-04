@@ -88,8 +88,13 @@ def get_successor_type(assignment, semester_index, change_type=0):
     flat_courses = get_flat_courses(assignment)
 
     #  add course (type 0), mutate course (type 1), delete course (type 2)
-    if change_type == 0:
-        pass
+    if change_type == 2 and len(assignment[semester_index]) == 0:
+        return assignment
+
+    elif change_type == 0:
+        if len(assignment[semester_index]) == 4:
+            return assignment
+
     else:
         # remove random course from assignment
         course_index = randint(0, len(assignment[semester_index]) - 1)
