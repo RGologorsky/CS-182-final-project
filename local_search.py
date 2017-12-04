@@ -1,59 +1,22 @@
-from random import *
-import numpy as np
-import matplotlib.pyplot as plt
-from copy import deepcopy
-
-from printing import *
-from constants import *
+from random         import randint, choice
+from printing       import *
+from helpers        import *
+from constants      import *
 from cost_functions import *
-from cost_dicts import *
-from reqs import *
+from cost_dicts     import *
+from reqs           import *
+from copy           import deepcopy
 
-# returns True with probability p
-def coin_flip(p):
-    return random() <= p
+# ASSIGNMENT = list of 8 semesters; each semester is a list of up to 4 classes
+# SUCCESSOR = 1 course ADDED, MUTATED, or DELETED from the ASSIGNMENT
 
-def get_mutation_index(assignment):
-    semester_index = randint(0, 7) # randint is inclusive both bounds
-    course_index = randint(0, len(assignment[semester_index]) - 1)
-
-    return (semester_index, course_index)
-
-def pick_course(domain):
-    return choice(domain)
-
-def overlap(course1, course2):
-
-    if course1 not in courses or course2 not in courses:
-        return False
-
-    if courses[course1]["SEMESTER"] != courses[course2]["SEMESTER"]:
-        return False
-
-    days1 = courses[course1]["DAYS"]
-    days2 = courses[course2]["DAYS"]
-
-    # handles when no days: overlap is 0
-    if len(days1 & days2) == 0:
-        return False
-
-    start1 = courses[course1]["START"]
-    end1   = courses[course1]["END"]
-
-    start2 = courses[course2]["START"]
-    end2   = courses[course2]["END"]
-
-    # class 1 first or class 2 first
-    return (start1 < start2 and end1 < start2) or \
-            (start2 < start1 and end2 < start1)
+# ASSIGNMENT: 8 semesters, each semester has <=4 classes, ~20 options per class
+# ~ 1100 SUCCESSORS: 8 semesters, each semester <= 4 classes, for each class:
+# ~25 add options, ~4 delete options, ~25x4 mutate options => 140 choices
+# ==> 8 * 140 ~ 1100 SUCCESSORS
 
 
-def no_overlap(course, assigned_courses):
-    for assigned_course in assigned_courses:
-        if overlap(course, assigned_course):
-            return False
-    return True
-
+# returns the greedy successor state.
 def get_greedy_successor(assignment):
    
     min_cost = get_req_cost(assignment)
@@ -92,25 +55,18 @@ def get_successor_type(assignment, semester_index, change_type=0):
     if change_type == 2 and len(assignment[semester_index]) == 0:
         return assignment
 
-    elif change_type == 0:
-        if len(assignment[semester_index]) == 4:
+    if change_type == 0 and len(assignment[semester_index]) == 4:
             return assignment
 
-    else:
+    if change_type == 1 or change_type == 2: # choose course to mutate/delete 
         # remove random course from assignment
         course_index = randint(0, len(assignment[semester_index]) - 1)
         flat_courses.remove(assignment[semester_index][course_index])
 
 
-    # compute rough domain
+    # compute domain for a new course to add to the assignment
     semester = 'F' if semester_index % 2 == 0 else 'S'
-    domain = []
-
-    for course in courses:
-        course_info = courses[course]
-        if course_info["SEMESTER"] == semester and no_overlap(course, flat_courses):
-            domain.append(course)
-
+    domain = new_course_domain(semester, flat_courses)
 
     def new_assignment(course):
         a = deepcopy(assignment)
@@ -131,26 +87,23 @@ def get_successor_type(assignment, semester_index, change_type=0):
     return successor
 
 
-MAX_NUM_SIDEWAYS = 100
-
-def hill_climbing(assignment):
+def hill_climbing(assignment, MAX_NUM_SIDEWAYS = 100):
     num_iter     = 0
     num_sideways = 0
+    num_plateux  = 0
 
-    print_assignment(assignment)
     curr_cost = get_req_cost(assignment)
     
     while True:
         successor = get_greedy_successor(assignment)
         successor_cost = get_req_cost(successor)
-        
-        print_assignment(successor)
-        
+                
         if successor_cost < curr_cost:
             assignment = successor
             curr_cost = successor_cost 
             num_iter += 1
             num_sideways = 0 # overcome  plateux, reset num sideways
+            num_plateux += 1
         else:
             num_sideways += 1
             
@@ -158,7 +111,7 @@ def hill_climbing(assignment):
                 assignment = successor
                 num_iter += 1
             else: # no escaping the plateux
-                return assignment
+                return (assignment, MAX_NUM_SIDEWAYS, num_iter, num_plateux)
 
 result = hill_climbing([
                         ["CS109"], ["CS1"], 
@@ -166,4 +119,4 @@ result = hill_climbing([
                         ["MATH21A"], ["CS181"],
                         ["AM107"], ["MATH23A"]
                        ])
-print result
+print_hill_climb(result)

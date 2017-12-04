@@ -42,4 +42,10 @@ def print_assignment(assignment):
     print("\n")
        
 
+def print_hill_climb(result):
+    (assignment, MAX_NUM_SIDEWAYS, num_iter, num_plateux) = result
+    print " ====== RESULT of HILL-CLIMBING ======="
+    print "MAX_NUM_SIDEWAYS = %d. NUM_PLATEUX = %d. NUM_ITER = %d." % \
+        (MAX_NUM_SIDEWAYS, num_plateux, num_iter)
+    print_assignment(assignment)
 
