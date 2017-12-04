@@ -15,6 +15,15 @@
 - greedy local search (Rachel)
 - simulated annealing (Rachel)
 
+# Problems we Faced
+
+- Local search plateux
+
+# Tests 
+
+sideways moves vs. no sideways moves:
+    - difference in cost found
+    - diference in num. iter. needed
 # Files
 
 ## printing: 
