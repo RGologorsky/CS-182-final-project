@@ -1,4 +1,8 @@
 # constants
+
+# This file contains the course dictionary, which was copy/pasted from
+# the CSV parser output. This way we gain efficiency by not having to 
+# preprocess the CSV each time we run the program.
 MAX_COST = 1000
 
 # courses dictionary

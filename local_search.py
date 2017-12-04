@@ -91,6 +91,7 @@ def hill_climbing(assignment, MAX_NUM_SIDEWAYS = 100):
     num_iter     = 0
     num_sideways = 0
     num_plateux  = 0
+    num_plateux_steps = 0
 
     curr_cost = get_req_cost(assignment)
     
@@ -102,8 +103,12 @@ def hill_climbing(assignment, MAX_NUM_SIDEWAYS = 100):
             assignment = successor
             curr_cost = successor_cost 
             num_iter += 1
-            num_sideways = 0 # overcome  plateux, reset num sideways
+
+            # overcome  plateux, reset num sideways
             num_plateux += 1
+            num_plateux_steps += num_sideways
+            num_sideways = 0 
+
         else:
             num_sideways += 1
             
@@ -111,12 +116,4 @@ def hill_climbing(assignment, MAX_NUM_SIDEWAYS = 100):
                 assignment = successor
                 num_iter += 1
             else: # no escaping the plateux
-                return (assignment, MAX_NUM_SIDEWAYS, num_iter, num_plateux)
-
-result = hill_climbing([
-                        ["CS109"], ["CS1"], 
-                        ["CS182"], ["CS125"], 
-                        ["MATH21A"], ["CS181"],
-                        ["AM107"], ["MATH23A"]
-                       ])
-print_hill_climb(result)
+                return (assignment, MAX_NUM_SIDEWAYS, num_iter, num_plateux, (num_plateux_steps * 1.0)/num_plateux)

@@ -2,7 +2,7 @@ import csv
 from pprint import *
 
 # TO DO: NORMALIZE SPREADSHEET
-courses_ha = dict()
+courses = dict()
 
 # converts "130PM" -> 1330, etc.
 

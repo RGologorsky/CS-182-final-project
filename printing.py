@@ -43,9 +43,9 @@ def print_assignment(assignment):
        
 
 def print_hill_climb(result):
-    (assignment, MAX_NUM_SIDEWAYS, num_iter, num_plateux) = result
+    (assignment, MAX_NUM_SIDEWAYS, num_iter, num_plateux, avg_plateux_steps) = result
     print " ====== RESULT of HILL-CLIMBING ======="
-    print "MAX_NUM_SIDEWAYS = %d. NUM_PLATEUX = %d. NUM_ITER = %d." % \
-        (MAX_NUM_SIDEWAYS, num_plateux, num_iter)
+    print "MAX_NUM_SIDEWAYS = %d. NUM_PLATEUX = %d. AVG_PLATEUX_STEPS = %2.3f. NUM_ITER = %d." % \
+        (MAX_NUM_SIDEWAYS, num_plateux, avg_plateux_steps, num_iter)
     print_assignment(assignment)
 
