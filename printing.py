@@ -36,7 +36,7 @@ def print_assignment(assignment):
         season = "Fall"     if even_semester else "Spring"
         year   = (year + 1) if even_semester else year
 
-        print "Year %d, %10s Classes: %s" % (year, season, course_list_to_string(semester))
+        print "Year %d, %7s Classes: %s" % (year, season, course_list_to_string(semester))
 
     print_cost(assignment)
     print("\n")

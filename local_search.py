@@ -55,10 +55,13 @@ def no_overlap(course, assigned_courses):
     return True
 
 def get_greedy_successor(assignment):
+   
     min_cost = get_req_cost(assignment)
+
     best_successor = assignment
     
     for semester_index in xrange(8):
+            # successors: (0) add, (1) mutate, (2) delete course from semester
             successor0 = get_successor_type(assignment, semester_index, 0)
             successor1 = get_successor_type(assignment, semester_index, 1)
             successor2 = get_successor_type(assignment, semester_index, 2)
@@ -67,17 +70,15 @@ def get_greedy_successor(assignment):
             cost1 = get_req_cost(successor1)
             cost2 = get_req_cost(successor2)
 
-            if cost0 < min_cost:
-                best_successor = successor0
-                min_cost = cost0
+            min_new = min(cost0, cost1, cost2)
 
-            if cost1 < min_cost:
-                best_successor = successor1
-                min_cost = cost1
+            if min_new == cost0: successor = successor0
+            if min_new == cost1: successor = successor1
+            if min_new == cost2: successor = successor2
 
-            if cost2 < min_cost:
-                best_successor = successor2
-                min_cost = cost2
+            if min_new <= min_cost:
+                best_successor = successor
+                min_cost = min_new
 
     return best_successor
 
@@ -130,21 +131,34 @@ def get_successor_type(assignment, semester_index, change_type=0):
     return successor
 
 
+MAX_NUM_SIDEWAYS = 100
+
 def hill_climbing(assignment):
-    num_iter = 0
+    num_iter     = 0
+    num_sideways = 0
+
     print_assignment(assignment)
+    curr_cost = get_req_cost(assignment)
+    
     while True:
         successor = get_greedy_successor(assignment)
         successor_cost = get_req_cost(successor)
         
         print_assignment(successor)
         
-        if get_req_cost(successor) < get_req_cost(assignment):
+        if successor_cost < curr_cost:
             assignment = successor
+            curr_cost = successor_cost 
             num_iter += 1
-            print assignment
+            num_sideways = 0 # overcome  plateux, reset num sideways
         else:
-            return assignment
+            num_sideways += 1
+            
+            if num_sideways < MAX_NUM_SIDEWAYS:
+                assignment = successor
+                num_iter += 1
+            else: # no escaping the plateux
+                return assignment
 
 result = hill_climbing([
                         ["CS109"], ["CS1"], 

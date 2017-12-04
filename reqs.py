@@ -10,8 +10,14 @@ def math_cost(courses):
     lin_alg    = ["AM21A","MATH21A", "MATH23A","MATH25B", "MATH55B"]
     multi_calc = ["AM21B","MATH21B", "MATH23B","MATH25A", "MATH55A"]
 
-    matches = common(lin_alg, courses) 
-    return (max(0, 2 - len(matches)), matches)
+    matches1 = common(lin_alg, courses) 
+    matches2 = common(multi_calc, courses) 
+
+    cost = 2
+    if len(matches1) >= 1: cost -= 1
+    if len(matches2) >= 1: cost -= 1
+
+    return (cost, matches1 | matches2)
     
 def software_cost(courses):
     software = ["CS50", "CS51", "CS61"]
