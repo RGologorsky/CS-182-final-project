@@ -130,6 +130,6 @@ def sideways_first_choice(weights, MAX_NUM_SIDEWAYS = 100):
     # print stats
     print("First-Choice Algorithm: Initial Cost: {}. Final Cost: {}.\n Assignment:{}".format(initial_cost, curr_cost, assignment))
     # return a trace of values resulting from your simulated annealing
-    plt.plot(cost_trace, label="First Choice Search - 1000s of Successors")
-    plt.show()
+    #plt.plot(cost_trace, label="First Choice Search - 1000s of Successors")
+    #plt.show()
     return assignment

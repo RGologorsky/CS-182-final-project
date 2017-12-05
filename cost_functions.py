@@ -9,7 +9,7 @@ def get_cost(assignment, weights = [100, 1, 1, 1, 1]):
     courses = get_flat_courses(assignment)
     return weights[0] * get_req_cost(courses) + \
         weights[1] * get_prereq_cost(assignment) + \
-        weights[2] * get_workload_cost(courses) + \
+        weights[2] * get_workload_cost(assignment) + \
         weights[3] * get_q_cost(courses) + \
         weights[4] * get_enrollment_cost(courses)
 
@@ -34,14 +34,24 @@ def get_prereq_cost(assignment):
                         num_violated += 1
     return num_violated
 
-def get_workload_cost(courses):
-    return sum(map(lambda c: get_feature_cost(c, "WORKLOAD"), courses))
+def get_workload_cost(assignment):
+    courses = get_flat_courses(assignment)
+    total_hrs = sum(map(lambda c: get_feature_cost(c, "WORKLOAD"), courses))
+    avg_hours = total_hrs/len(courses)
+
+    scaled_hrs = hrs/200.0
+    # add variances
+    total_variance = 0
+    for semester in assignment:
+        total_variance += sum(lambda c: (c - avg_hours)^2, semester)
+
+    return scaled_hrs + total_variance
 
 def get_q_cost(courses):
     return sum(map(lambda c: 5 - get_feature_cost(c, "Q"), courses))
 
 def get_enrollment_cost(courses):
-    return sum(map(lambda c: get_feature_cost(c, "ENROLLMENT"), courses))   
+    return sum(map(lambda c: get_feature_cost(c, "ENROLLMENT"), courses))/25.0   
 
 # course requirement cost
 # def get_req_cost(assignment):
