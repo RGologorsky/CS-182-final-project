@@ -17,9 +17,9 @@ from copy           import deepcopy
 
 
 # returns the greedy - lowest cost - successor state.
-def get_greedy_successor2(assignment):
+def get_greedy_successor2(assignment, wts):
 
-    min_cost = get_cost(assignment)
+    min_cost = get_cost(assignment, wts)
 
     best_successor = assignment
 
@@ -29,7 +29,7 @@ def get_greedy_successor2(assignment):
             successor1 = get_successor_type2(assignment, semester_index, 1)
             successor2 = get_successor_type2(assignment, semester_index, 2)
 
-            cost0, cost1, cost2 = get_cost(successor0), get_cost(successor1), get_cost(successor2)
+            cost0, cost1, cost2 = get_cost(successor0, wts), get_cost(successor1, wts), get_cost(successor2, wts)
 
             # motivates adding over deleting
             if successor0 <= successor1 and successor0 <= successor2:
@@ -67,30 +67,35 @@ def get_successor_type2(assignment, semester_index, change_type=0):
     if change_type == 0: # adding a course
         possible_courses = new_course_domain(semester_index, assignment)
         possible_assignments = map(lambda x: add_assignment(assignment, semester_index, x), possible_courses)
-        return min(possible_assignments, key = lambda a: get_cost(a))
+        if len(possible_assignments) == 0:
+            return assignment   
+        return min(possible_assignments, key = lambda a: get_cost(a, wts))
 
     if change_type == 1 or change_type == 2: # deleting a course
         # possibilities for the course index to delete.
         possible_course_indices = range(len(assignment[semester_index]))
         possible_assignments = map(lambda x: del_assignment(assignment, semester_index, x), possible_course_indices)
         
+        if len(possible_assignments) == 0:
+            return assignment  
+
         if change_type == 1: # if just delete, we are done.
-            return min(possible_assignments, key = lambda a: get_cost(a))
+            return min(possible_assignments, key = lambda a: get_cost(a, wts))
 
         # for mutation, we now check best add state.
         return min(possible_assignments, \
-            key = lambda a: get_cost(get_successor_type2(a, semester_index, 0)))
+            key = lambda a: get_cost(get_successor_type2(a, wts, semester_index, 0)))
 
 
 # we allow sideways movements to overcome plateux
-def sideways_hill_climbing2(assignment, MAX_NUM_SIDEWAYS = 100):
+def sideways_hill_climbing2(assignment, wts, MAX_NUM_SIDEWAYS = 100):
     num_iter     = 0
     num_sideways = 0
     num_plateux  = 0
     total_sideways_steps = 0
 
     # LATER TESTING & GRAPHS
-    initial_cost = get_cost(assignment)
+    initial_cost = get_cost(assignment, wts)
     curr_cost = initial_cost
 
     trace = [assignment]
@@ -140,5 +145,5 @@ def sideways_hill_climbing2(assignment, MAX_NUM_SIDEWAYS = 100):
     return assignment
   
 # no sideway steps allowed
-def naive_hill_climbing2(assignment):
-    return sideways_hill_climbing(assignment, MAX_NUM_SIDEWAYS = 0)
+def naive_hill_climbing2(assignment, weights):
+    return sideways_hill_climbing(assignment, weights, MAX_NUM_SIDEWAYS = 0)

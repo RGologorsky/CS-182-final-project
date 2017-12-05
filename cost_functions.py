@@ -1,17 +1,23 @@
 # Return the cost of an assignment
 from constants import *
 from helpers import *
+from math import pow
 
 def get_flat_courses(assignment):
     return [course for semester in assignment for course in semester]
 
-def get_cost(assignment, weights = [100, 1, 1, 1, 1]):
+def get_cost(assignment, weights):
+    total_cost = 0
     courses = get_flat_courses(assignment)
-    return weights[0] * get_req_cost(courses) + \
-        weights[1] * get_prereq_cost(assignment) + \
-        weights[2] * get_workload_cost(assignment) + \
-        weights[3] * get_q_cost(courses) + \
-        weights[4] * get_enrollment_cost(courses)
+
+    total_cost += 1000 * get_req_cost(courses)
+    
+    if weights[1] != 0: total_cost += weights[1] * get_prereq_cost(assignment)
+    if weights[2] != 0: total_cost += weights[2] * get_workload_cost(assignment)
+    if weights[3] != 0: total_cost += weights[3] * get_q_cost(courses)
+    if weights[4] != 0: total_cost += weights[4] * get_enrollment_cost(courses)
+
+    return total_cost
 
 def get_feature_cost(course, feature):
     if course in courses and feature in courses[course]:
@@ -36,16 +42,18 @@ def get_prereq_cost(assignment):
 
 def get_workload_cost(assignment):
     courses = get_flat_courses(assignment)
-    total_hrs = sum(map(lambda c: get_feature_cost(c, "WORKLOAD"), courses))
+    hrs = map(lambda c: get_feature_cost(c, "WORKLOAD"), courses)
+    total_hrs = sum(hrs)
     avg_hours = total_hrs/len(courses)
 
-    scaled_hrs = hrs/200.0
+    scaled_hrs = total_hrs/200.0
     # add variances
     total_variance = 0
     for semester in assignment:
-        total_variance += sum(lambda c: (c - avg_hours)^2, semester)
+        total_variance += sum(map(lambda c: pow((c - avg_hours),2), hrs))
+    scaled_variance = total_variance/200.0
 
-    return scaled_hrs + total_variance
+    return scaled_hrs + scaled_variance
 
 def get_q_cost(courses):
     return sum(map(lambda c: 5 - get_feature_cost(c, "Q"), courses))
@@ -91,23 +99,16 @@ def math_cost(courses):
     
 def software_cost(courses):
     software = ["CS050", "CS051", "CS061"]
-
-    my_software = common(software, courses) 
     used_to_satisfy = []
 
     cost = 2
+    for course in software:
+        if course in courses:
+            used_to_satisfy.append(course)
+            cost -= 1
 
-    if len(my_software) == 1:
-        used_to_satisfy.append(my_software.pop())
-        cost -= 1
-
-    # decreases size by 1
-    if len(my_software) == 1:
-        used_to_satisfy.append(my_software.pop())
-        cost -= 1
-
-    # note remaining courses in my_sofware are the extra ones
-    # return (cost, used_to_satisfy, my_software)
+            if cost == 0:
+                return (cost, used_to_satisfy)
     return (cost, used_to_satisfy)
    
 
@@ -216,7 +217,7 @@ def technical_and_breadth_cost(courses):
     return (cost, used_to_satisfy)
 
 def get_req_cost(courses):
-    return math_cost(courses)[0] + software_cost(courses)[0] \
-        + theory_cost(courses)[0] \
+    return math_cost(courses)[0] + 10 * software_cost(courses)[0] \
+        + 5 * theory_cost(courses)[0] \
         + technical_and_breadth_cost(courses)[0]
        

@@ -71,3 +71,10 @@ def print_hill_climb(result):
         (initial_cost, final_cost, MAX_NUM_SIDEWAYS, num_plateux, avg_plateux_steps, num_iter)
     print_assignment(assignment)
 
+def short_print(result):
+    (assignment, initial_cost, final_cost, MAX_NUM_SIDEWAYS, num_iter, num_plateux, avg_plateux_steps) = result
+
+    print "INITIAL COST: %d. NOW: %d. MAX_NUM_SIDEWAYS = %d. #LOCAL_SEARCH_ITER = %d." % \
+        (initial_cost, final_cost, MAX_NUM_SIDEWAYS, num_iter)
+    print(assignment)
+
