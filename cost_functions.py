@@ -3,6 +3,7 @@ from constants import *
 from helpers import *
 from math import pow
 
+COURSE_REQ_WEIGHT = 1000 # 
 def get_flat_courses(assignment):
     return [course for semester in assignment for course in semester]
 
@@ -10,12 +11,12 @@ def get_cost(assignment, weights):
     total_cost = 0
     courses = get_flat_courses(assignment)
 
-    total_cost += 1000 * get_req_cost(courses)
+    total_cost += COURSE_REQ_WEIGHT * get_req_cost(courses)
     
-    if weights[1] != 0: total_cost += weights[1] * get_prereq_cost(assignment)
-    if weights[2] != 0: total_cost += weights[2] * get_workload_cost(assignment)
-    if weights[3] != 0: total_cost += weights[3] * get_q_cost(courses)
-    if weights[4] != 0: total_cost += weights[4] * get_enrollment_cost(courses)
+    if weights[0] != 0: total_cost += weights[0] * get_prereq_cost(assignment)
+    if weights[1] != 0: total_cost += weights[1] * get_workload_cost(assignment)
+    if weights[2] != 0: total_cost += weights[2] * get_q_cost(courses)
+    if weights[3] != 0: total_cost += weights[3] * get_enrollment_cost(courses)
 
     return total_cost
 
