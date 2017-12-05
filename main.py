@@ -1,8 +1,9 @@
 from printing import *
 #from branch_and_bound import *
-from local_search_restricted_successors import *
-from local_search_many_successors import *
-from random_restart import *
+from local_search_restricted_successors import sideways_hill_climbing, naive_hill_climbing
+from local_search_many_successors       import sideways_hill_climbing2,naive_hill_climbing2
+from first_choice_hill_climbing         import sideways_first_choice,  naive_first_choice
+from random_restart                     import random_restart, limited_random_restart 
 #from simulated_annealing import *
 
 
@@ -18,5 +19,5 @@ weights = [0, 0, 0, 0]
 MAX_NUM_SIDEWAYS = 0
 MAX_NUM_RESTARTS = 20
 
-result = limited_random_restart(sideways_hill_climbing2, weights, MAX_NUM_SIDEWAYS, MAX_NUM_RESTARTS)
+result = limited_random_restart(sideways_first_choice, weights, MAX_NUM_SIDEWAYS, MAX_NUM_RESTARTS)
 print result
