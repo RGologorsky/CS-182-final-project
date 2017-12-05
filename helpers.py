@@ -34,8 +34,8 @@ def overlap(course1, course2):
     end2   = courses[course2]["END"]
 
     # class 1 first or class 2 first
-    return (start1 < start2 and end1 < start2) or \
-            (start2 < start1 and end2 < start1)
+    # print start1, end1, start2, end2
+    return not ((end1 < start2) or (end2 < start1))
 
 
 # returns whether course has no overlap with the other courses
@@ -45,13 +45,13 @@ def no_overlap(course, assigned_courses):
             return False
     return True
 
+def get_flat_courses(assignment):
+    return [course for semester in assignment for course in semester]
+
 # return rough domain of a course to add to assignment.
-def new_course_domain(semester, flat_courses):
-    domain = []
-
-    for course in courses:
-        course_info = courses[course]
-        if course_info["SEMESTER"] == semester and no_overlap(course, flat_courses):
-            domain.append(course)
-
-    return domain
+def new_course_domain(semester_index, assignment):
+    semester = 'F' if semester_index % 2 == 0 else 'S'
+    already_taken = get_flat_courses(assignment)
+    return filter(lambda c: courses[c]["SEMESTER"] == semester and \
+        c not in already_taken and no_overlap(c, assignment[semester_index]), \
+        courses.keys())
