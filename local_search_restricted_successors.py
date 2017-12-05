@@ -19,7 +19,6 @@ from copy           import deepcopy
 def get_greedy_successor(assignment, weights):
 
     min_cost = get_cost(assignment, weights)
-    #print "MIN COST, ", min_cost
     best_successor = assignment
 
     for semester_index in xrange(8):
@@ -27,23 +26,13 @@ def get_greedy_successor(assignment, weights):
             successor0, cost0 = get_successor_type(assignment, weights, semester_index, 0)
             successor1, cost1 = get_successor_type(assignment, weights, semester_index, 1)
 
-            #successors = [successor0, successor1]
-            #costs = map(lambda x: get_cost(x, weights), successors)
-            #min_index = min([0 1], key = lambda i: costs[i])
-
-            #successor = successors[min_index]
-
-            # motivates adding over deleting
             if min(cost0, cost1) <= min_cost:
                 if cost0 < cost1:
                     best_successor, min_cost = (successor0, cost0)
-                    # print "cost0 < cost1. min cost: ", min_cost, "succ cost: ", min_cost
 
                 else:
                     best_successor, min_cost = (successor1, cost1)
-                    # print "cost0 < cost1. min cost: ", min_cost, "succ cost: ", min_cost
 
-    #print "NEW MIN COST: ", min_cost
     return (best_successor, min_cost)
 
 # A state is a list of value indices.
@@ -52,32 +41,19 @@ def get_successor_type(assignment, weights, semester_index, change_type=0):
 
     #  add course (type 0), delete course (type 1)
 
-    # can't delete if no courses in semester
-    if change_type == 1 and len(assignment[semester_index]) == 0:
-        return (None, float("inf"))
-
-    # can't add if alreadying taking 4 courses
-    if change_type == 0 and len(assignment[semester_index]) == 4:
+    if change_type == 0:
+        if len(assignment[semester_index]) == 4: # can't add if taking 4 courses
             return (None, float("inf"))
 
-    def add_assignment(course):
-        a = deepcopy(assignment)
-        a[semester_index].append(course)
-        return a
-
-    def del_assignment(course_index):
-        a = deepcopy(assignment)
-        del a[semester_index][course_index]
-        return a
-
-    if change_type == 0: # adding a course
         possible_courses = new_course_domain(semester_index, assignment)
-        possible_assignments = map(lambda x: add_assignment(x), possible_courses)
+        possible_assignments = map(lambda x: add_to_assignment(assignment, semester_index, x), possible_courses)
 
-    # possibilities for the course index to delete.
     else:
+        if len(assignment[semester_index]) == 0:  # can't mutate/delete if no course to pick
+            return (None, float("inf"))
+
         possible_course_indices = range(len(assignment[semester_index]))
-        possible_assignments = map(lambda x: del_assignment(x), possible_course_indices)
+        possible_assignments = map(lambda x: del_to_assignment(assignment, semester_index, x), possible_course_indices)
 
     if len(possible_assignments) == 0:
             return (None, float("inf"))
@@ -85,7 +61,7 @@ def get_successor_type(assignment, weights, semester_index, change_type=0):
     assignment_costs = map(lambda x: (x, get_cost(x, weights)), possible_assignments)
     return min(assignment_costs, key = lambda (x,c): c)
 
-def sideways_hill_climbing(assignment, weights, MAX_NUM_SIDEWAYS = 100):
+def general_hill_climbing(successor_fun, assignment, weights, MAX_NUM_SIDEWAYS = 100):
     # print "In Sideways HC, #sideways = ", MAX_NUM_SIDEWAYS
     num_iter     = 0
     num_sideways = 0
@@ -104,7 +80,7 @@ def sideways_hill_climbing(assignment, weights, MAX_NUM_SIDEWAYS = 100):
 
 
     while True:
-        successor, successor_cost = get_greedy_successor(assignment, weights)
+        successor, successor_cost = successor_fun(assignment, weights)
 
         trace.append(successor)
         cost_trace.append(successor_cost)
@@ -136,6 +112,14 @@ def sideways_hill_climbing(assignment, weights, MAX_NUM_SIDEWAYS = 100):
                 return (assignment, initial_cost, curr_cost, MAX_NUM_SIDEWAYS, \
                             num_iter, num_plateux, get_avg_num_sideways())
 
+
+def sideways_hill_climbing(assignment, weights, MAX_NUM_SIDEWAYS = 100):
+    return general_hill_climbing(get_greedy_successor, assignment, weights, MAX_NUM_SIDEWAYS)
+    # print stats
+    # print("Local Search Algorithm: Initial Cost: {}. Final Cost: {}.\n Assignment:{}".format(initial_cost, curr_cost, assignment))
+    # return a trace of values resulting from your simulated annealing
+    #plt.plot(cost_trace, label="Full Local Search - 1000s of Successors")
+    # plt.show()
 
 # no plateux
 def naive_hill_climbing(assignment):
