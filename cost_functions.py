@@ -1,5 +1,9 @@
 # Return the cost of an assignment
+from constants import *
 from helpers import *
+
+def get_flat_courses(assignment):
+    return [course for semester in assignment for course in semester]
 
 def get_cost(assignment, weights = [100, 1, 1, 1, 1]):
     courses = get_flat_courses(assignment)

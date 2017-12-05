@@ -9,14 +9,15 @@ from copy           import deepcopy
 # ASSIGNMENT = list of 8 semesters; each semester is a list of up to 4 classes
 # SUCCESSOR = 1 course ADDED, MUTATED, or DELETED from the ASSIGNMENT
 
-# ASSIGNMENT: 8 semesters, each semester has <=4 classes, ~20 options per class
-# ~ 1100 SUCCESSORS: 8 semesters, each semester <= 4 classes, for each class:
-# ~25 add options, ~4 delete options => 30 choices
-# ==> 8 * 30 ~ 240 SUCCESSORS
+# ASSIGNMENT = list of 8 semesters; each semester is a list of up to 4 classes
+# SUCCESSOR = 1 course ADDED, MUTATED, or DELETED from the ASSIGNMENT
+
+# ASSIGNMENT: 8 semesters, each semester has <=4 classes. for each semester:
+# ~25 add options, ~4 delete options, 20x4 = 80 mutate options => 1000 successors
 
 
-# returns the greedy successor state.
-def get_greedy_successor(assignment):
+# returns the greedy - lowest cost - successor state.
+def get_greedy_successor2(assignment):
 
     min_cost = get_cost(assignment)
 
@@ -24,18 +25,24 @@ def get_greedy_successor(assignment):
 
     for semester_index in xrange(8):
             # successors: (0) add, (1) delete course from semester
-            successor0 = get_successor_type(assignment, semester_index, 0)
-            successor1 = get_successor_type(assignment, semester_index, 1)
+            successor0 = get_successor_type2(assignment, semester_index, 0)
+            successor1 = get_successor_type2(assignment, semester_index, 1)
+            successor2 = get_successor_type2(assignment, semester_index, 2)
 
-            cost0, cost1 = get_cost(successor0), get_cost(successor1)
+            cost0, cost1, cost2 = get_cost(successor0), get_cost(successor1), get_cost(successor2)
 
             # motivates adding over deleting
-            if successor0 < successor1:
+            if successor0 <= successor1 and successor0 <= successor2:
                 successor = successor0
                 successor_cost = cost0
-            else:
+            
+            elif successor1 <= successor2 and successor1 <= successor3:
                 successor = successor1
                 successor_cost = cost1
+            
+            else:
+                successor = successor2
+                successor_cost = cost2
 
             if successor_cost <= min_cost:
                 best_successor = successor
@@ -43,11 +50,11 @@ def get_greedy_successor(assignment):
 
     return (best_successor, min_cost)
 
-# A state is a list of value indices.
-# Randomly picks value indices until the weight limit is reached
-def get_successor_type(assignment, semester_index, change_type=0):
 
-    #  add course (type 0), delete course (type 1)
+# returns lowest cost successor state of given action - add, mutate, delete
+def get_successor_type2(assignment, semester_index, change_type=0):
+
+    #  add course (type 0), delete course (type 1), muate course (type 2)
 
     # can't delete if no courses in semester
     if change_type == 1 and len(assignment[semester_index]) == 0:
@@ -57,28 +64,26 @@ def get_successor_type(assignment, semester_index, change_type=0):
     if change_type == 0 and len(assignment[semester_index]) == 4:
             return assignment
 
-    def add_assignment(course):
-        a = deepcopy(assignment)
-        a[semester_index].append(course)
-        return a
-
-    def del_assignment(course_index):
-        a = deepcopy(assignment)
-        del a[semester_index][course_index]
-        return a
-
     if change_type == 0: # adding a course
         possible_courses = new_course_domain(semester_index, assignment)
-        possible_assignments = map(lambda x: add_assignment(x), possible_courses)
+        possible_assignments = map(lambda x: add_assignment(assignment, semester_index, x), possible_courses)
         return min(possible_assignments, key = lambda a: get_cost(a))
 
-    # possibilities for the course index to delete.
-    possible_course_indices = range(len(assignment[semester_index]))
-    possible_assignments = map(lambda x: del_assignment(x), possible_course_indices)
-    return min(possible_assignments, key = lambda a: get_cost(a))
+    if change_type == 1 or change_type == 2: # deleting a course
+        # possibilities for the course index to delete.
+        possible_course_indices = range(len(assignment[semester_index]))
+        possible_assignments = map(lambda x: del_assignment(assignment, semester_index, x), possible_course_indices)
+        
+        if change_type == 1: # if just delete, we are done.
+            return min(possible_assignments, key = lambda a: get_cost(a))
+
+        # for mutation, we now check best add state.
+        return min(possible_assignments, \
+            key = lambda a: get_cost(get_successor_type2(a, semester_index, 0)))
 
 
-def sideways_hill_climbing(assignment, MAX_NUM_SIDEWAYS = 100):
+# we allow sideways movements to overcome plateux
+def sideways_hill_climbing2(assignment, MAX_NUM_SIDEWAYS = 100):
     num_iter     = 0
     num_sideways = 0
     num_plateux  = 0
@@ -96,7 +101,7 @@ def sideways_hill_climbing(assignment, MAX_NUM_SIDEWAYS = 100):
 
 
     while True:
-        successor, successor_cost = get_greedy_successor(assignment)
+        successor, successor_cost = get_greedy_successor2(assignment)
 
         trace.append(successor)
         cost_trace.append(successor_cost)
@@ -127,10 +132,13 @@ def sideways_hill_climbing(assignment, MAX_NUM_SIDEWAYS = 100):
                 num_plateux += 1
                 total_sideways_steps += num_sideways
                 num_sideways = 0
-
-def simulated_annealing(assignment):
-
-
-
-def naive_hill_climbing(assignment):
+    # print stats
+    print("Local Search Algorithm: Initial Cost: {}. Final Cost: {}.\n Assignment:{}".format(initial_cost, curr_cost, assignment))
+    # return a trace of values resulting from your simulated annealing
+    plt.plot(cost_trace, label="Full Local Search - 1000s of Successors")
+    plt.show()
+    return assignment
+  
+# no sideway steps allowed
+def naive_hill_climbing2(assignment):
     return sideways_hill_climbing(assignment, MAX_NUM_SIDEWAYS = 0)

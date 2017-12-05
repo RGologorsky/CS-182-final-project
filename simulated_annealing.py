@@ -1,53 +1,105 @@
 import numpy as np
+from helpers import *
+from constants import *
+from cost_functions import *
+import random
+import matplotlib.pyplot as plt
 
-def simulated_annealing(weights):
+# returns random neighbor. Neighbor is an assignment were one class is added/dropped
+def get_random_neighbor(assignment):
+    change_type = randint(0,1) # 0 = add course, 1 = delete course
 
-  curr_state = get_random_assignment()
+    no_add = False
+    no_del = False
 
-  initial_cost = get_cost(assignment, weights)
+    semester_index = randint(0, 7)
+    add_semester_indices = range(8)
+    del_semester_indices = range(8)
+
+    if change_type == 0:
+      add_semester_index = choice(add_semester_indices)
+      while change_type == 0 and len(add_semester_indices) > 0 and len(assignment[add_semester_index]) == 4:
+        add_semester_indices.remove(add_semester_index)
+
+        if len(add_semester_indices) == 0:
+            no_add = True # we can't add; we are full.
+            change_type = 1
+        else:
+          add_semester_index = choice(add_semester_indices)
+
+      if len(assignment[add_semester_index]) < 4:
+          semester_index = add_semester_index
+
+
+    if change_type == 1:
+      del_semester_index = choice(del_semester_indices)
+      while change_type == 1 and len(del_semester_indices) > 0 and len(assignment[del_semester_index]) == 0:
+        del_semester_indices.remove(del_semester_index)
+
+        if len(del_semester_indices) == 0:
+          no_del = True # we can't del; we are empty.
+          change_type = 0
+        else:
+          del_semester_index = choice(del_semester_indices)
+      if len(assignment[del_semester_index]) > 0:
+          semester_index = del_semester_index
+
+
+    # can't add if alreadying taking 4 courses - try again
+    if change_type == 0 and len(assignment[semester_index]) == 4:
+      return assignment
+
+    # can't delete if no courses in semester - try again
+    if change_type == 1 and len(assignment[semester_index]) == 0:
+        return assignment
+
+    if no_add and no_del: # impossible - we can add if we are empty.
+      return assignment
+
+    # add a course to the semester
+    if change_type == 0:
+        possible_courses = new_course_domain(semester_index, assignment)
+        if len(possible_courses) == 0:
+          # semester_indices.remove(semester_index)
+          # semester_index = choice(semester_indices)
+          return get_random_neighbor(assignment)
+
+        return add_to_assignment(assignment, semester_index, choice(possible_courses))
+
+    # del a course to the semester
+    return del_to_assignment(assignment, semester_index, randint(0, -1 + len(assignment[semester_index])))
+
+def simulated_annealing(assignment = None, weights):
+
+  curr_state = assignment if assignment else get_random_assignment()
+
+  initial_cost = get_cost(curr_state, weights)
   curr_cost = initial_cost
 
-  trace = [assignment]
+  trace      = [curr_state]
   cost_trace = [initial_cost]
 
   T = 1.0
   alpha = 0.99
 
   for t in xrange(10000):
-      neighbor, neighbor_cost = get_neighbor(curr_state, curr_cost)
-      delta_E = (neighbor_cost - curr_cost)/curr_cost # normalization
+      neighbor = get_random_neighbor(curr_state)
+      neighbor_cost = get_cost(neighbor, weights)
+
+      delta_E = (curr_cost - neighbor_cost)/curr_cost # normalization
       switch_probability = np.exp(delta_E/T) # used only when delta_E < 0
 
       # switch to neighbor if its advantageous or random move
       if delta_E > 0 or coin_flip(switch_probability):
-          curr_state, curr_wt, curr_val = neighbor, neighbor_wt, neighbor_val
+          curr_state, curr_cost = neighbor, neighbor_cost
 
-      trace.append(curr_val)
-      wt_trace.append(curr_wt)
+      trace.append(curr_state)
+      cost_trace.append(curr_cost)
       T = alpha * T
 
   # print stats
-  print("SA Algorithm: Value:{}, Weight:{}\nBag:{}".format(curr_val, curr_wt, curr_state))
-  # return a trace of values resulting from your simulated annealing
-  return trace
-
-if __name__ == "__main__":
-  # Greedy result is maximize v/w
-  vw_ratio = sorted(map(lambda x: (x, 1.*v[x]/w[x]), range(N)), key= lambda x: -x[1])
-  greedy_val = 0
-  greedy_weight = 0
-  greedy_bag = []
-  index = 0
-  while greedy_weight + w[vw_ratio[index][0]] < W:
-      greedy_val += v[vw_ratio[index][0]]
-      greedy_weight += w[vw_ratio[index][0]]
-      greedy_bag += [vw_ratio[index][0]]
-      index += 1
-
-  print("Greedy Algorithm:\nValue:{}, Weight:{}\nBag:{}".format(greedy_val, greedy_weight, greedy_bag))
-  SA_trace = simulated_annealing()
-  plt.plot([greedy_val]*len(SA_trace), label="Greedy")
+  print_assignment(curr_state)
+  print("SA Algorithm: Initial Cost: {}. Final Cost: {}.\n Assignment:{}".format(initial_cost, curr_cost, curr_state))
   plt.plot(SA_trace, label="SA")
-  plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
-         ncol=2, mode="expand", borderaxespad=0.)
-  plt.show()
+  # return a trace of values resulting from your simulated annealing
+  return assignment
