@@ -78,9 +78,9 @@ def get_successor_type2(assignment, weights, semester_index, change_type=0):
 
 
 # we allow sideways movements to overcome plateux
-def sideways_hill_climbing2(assignment, weights, MAX_NUM_SIDEWAYS = 100):
-    return general_hill_climbing(get_greedy_successor2, assignment, weights, MAX_NUM_SIDEWAYS)
+def sideways_hill_climbing2(weights, MAX_NUM_SIDEWAYS = 100, assignment = None):
+    return general_hill_climbing(get_greedy_successor2, weights, MAX_NUM_SIDEWAYS, assignment)
   
 # no sideway steps allowed
-def naive_hill_climbing2(assignment, weights):
-    return sideways_hill_climbing(assignment, weights, MAX_NUM_SIDEWAYS = 0)
+def naive_hill_climbing2(weights, assignment = None):
+    return sideways_hill_climbing(weights, MAX_NUM_SIDEWAYS = 0, assignment = None)

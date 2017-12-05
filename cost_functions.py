@@ -13,10 +13,10 @@ def get_cost(assignment, weights):
 
     total_cost += COURSE_REQ_WEIGHT * get_req_cost(courses)
     
-    if weights[0] != 0: total_cost += weights[0] * get_prereq_cost(assignment)
-    if weights[1] != 0: total_cost += weights[1] * get_workload_cost(assignment)
-    if weights[2] != 0: total_cost += weights[2] * get_q_cost(courses)
-    if weights[3] != 0: total_cost += weights[3] * get_enrollment_cost(courses)
+    if weights[0] != 0: total_cost += weights[0] * get_prereq_cost(assignment)[0]
+    if weights[1] != 0: total_cost += weights[1] * get_workload_cost(assignment)[0]
+    if weights[2] != 0: total_cost += weights[2] * get_q_cost(courses)[0]
+    if weights[3] != 0: total_cost += weights[3] * get_enrollment_cost(courses)[0]
 
     return total_cost
 

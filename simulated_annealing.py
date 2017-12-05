@@ -69,7 +69,7 @@ def get_random_neighbor(assignment):
     # del a course to the semester
     return del_to_assignment(assignment, semester_index, randint(0, -1 + len(assignment[semester_index])))
 
-def simulated_annealing(assignment = None, weights):
+def simulated_annealing(weights, assignment = None):
 
   curr_state = assignment if assignment else get_random_assignment()
 
@@ -83,6 +83,9 @@ def simulated_annealing(assignment = None, weights):
   alpha = 0.99
 
   for t in xrange(10000):
+      if int(curr_cost) == 0:
+        return (curr_state, "filler1", curr_cost)
+
       neighbor = get_random_neighbor(curr_state)
       neighbor_cost = get_cost(neighbor, weights)
 
@@ -102,4 +105,4 @@ def simulated_annealing(assignment = None, weights):
   print("SA Algorithm: Initial Cost: {}. Final Cost: {}.\n Assignment:{}".format(initial_cost, curr_cost, curr_state))
   plt.plot(SA_trace, label="SA")
   # return a trace of values resulting from your simulated annealing
-  return assignment
+  return (curr_state, "filler1", curr_cost)

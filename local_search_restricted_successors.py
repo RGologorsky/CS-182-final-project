@@ -61,13 +61,16 @@ def get_successor_type(assignment, weights, semester_index, change_type=0):
     assignment_costs = map(lambda x: (x, get_cost(x, weights)), possible_assignments)
     return min(assignment_costs, key = lambda (x,c): c)
 
-def general_hill_climbing(successor_fun, assignment, weights, MAX_NUM_SIDEWAYS = 100):
+def general_hill_climbing(successor_fun, weights, MAX_NUM_SIDEWAYS = 100, assignment = None):
     # print "In Sideways HC, #sideways = ", MAX_NUM_SIDEWAYS
+    print "WEIGHTS", weights
     num_iter     = 0
     num_sideways = 0
     num_plateux  = 0
     total_sideways_steps = 0
 
+    if not assignment:
+        assignment = get_random_assignment()
     # LATER TESTING & GRAPHS
     initial_cost = get_cost(assignment, weights)
     curr_cost = initial_cost
@@ -113,14 +116,15 @@ def general_hill_climbing(successor_fun, assignment, weights, MAX_NUM_SIDEWAYS =
                             num_iter, num_plateux, get_avg_num_sideways())
 
 
-def sideways_hill_climbing(assignment, weights, MAX_NUM_SIDEWAYS = 100):
-    return general_hill_climbing(get_greedy_successor, assignment, weights, MAX_NUM_SIDEWAYS)
-    # print stats
-    # print("Local Search Algorithm: Initial Cost: {}. Final Cost: {}.\n Assignment:{}".format(initial_cost, curr_cost, assignment))
-    # return a trace of values resulting from your simulated annealing
-    #plt.plot(cost_trace, label="Full Local Search - 1000s of Successors")
-    # plt.show()
+def sideways_hill_climbing(weights, MAX_NUM_SIDEWAYS = 100, assignment = None):
+    return general_hill_climbing(get_greedy_successor, weights, MAX_NUM_SIDEWAYS, assignment)
+  
+# no sideway steps allowed
+def naive_hill_climbing(weights, assignment = None):
+    return sideways_hill_climbing(weights, MAX_NUM_SIDEWAYS = 0, assignment = None)
 
-# no plateux
-def naive_hill_climbing(assignment):
-    return sideways_hill_climbing(assignment, MAX_NUM_SIDEWAYS = 0)
+# print stats
+# print("Local Search Algorithm: Initial Cost: {}. Final Cost: {}.\n Assignment:{}".format(initial_cost, curr_cost, assignment))
+# return a trace of values resulting from your simulated annealing
+#plt.plot(cost_trace, label="Full Local Search - 1000s of Successors")
+# plt.show()

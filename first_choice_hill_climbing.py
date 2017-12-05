@@ -80,14 +80,15 @@ def get_successor_type2(assignment, weights, semester_index, change_type, curr_c
         return assignment, curr_cost
 
 # we allow sideways movements to overcome plateux
-def sideways_first_choice(assignment, weights, MAX_NUM_SIDEWAYS = 100):
-    return general_hill_climbing(get_first_choice_successor2, assignment, weights, MAX_NUM_SIDEWAYS)
+def sideways_first_choice(weights, MAX_NUM_SIDEWAYS = 100, assignment = None):
+    return general_hill_climbing(get_first_choice_successor2, weights, MAX_NUM_SIDEWAYS, assignment)
+  
+# no sideway steps allowed
+def naive_first_choice(weights, assignment = None):
+    return sideways_first_choice(weights, MAX_NUM_SIDEWAYS = 0, assignment = None)
 
-    # print stats
+# print stats
     # print("First-Choice Algorithm: Initial Cost: {}. Final Cost: {}.\n Assignment:{}".format(initial_cost, curr_cost, assignment))
     # return a trace of values resulting from your simulated annealing
     #plt.plot(cost_trace, label="First Choice Search - 1000s of Successors")
     #plt.show()
-# no sideway steps allowed
-def naive_first_choice(assignment, weights):
-    return sideways_first_choice(assignment, weights, MAX_NUM_SIDEWAYS = 0)
