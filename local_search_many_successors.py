@@ -83,4 +83,4 @@ def sideways_hill_climbing2(weights, MAX_NUM_SIDEWAYS = 100, assignment = None):
   
 # no sideway steps allowed
 def naive_hill_climbing2(weights, assignment = None):
-    return sideways_hill_climbing(weights, MAX_NUM_SIDEWAYS = 0, assignment = None)
+    return sideways_hill_climbing2(weights, 0, assignment)

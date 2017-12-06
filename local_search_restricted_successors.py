@@ -6,6 +6,7 @@ from cost_functions import *
 from cost_dicts     import *
 from copy           import deepcopy
 
+import time
 # ASSIGNMENT = list of 8 semesters; each semester is a list of up to 4 classes
 # SUCCESSOR = 1 course ADDED, MUTATED, or DELETED from the ASSIGNMENT
 
@@ -28,19 +29,24 @@ def get_greedy_successor(assignment, weights):
 
             if min(cost0, cost1) <= min_cost:
                 if cost0 < cost1:
+                    #print "adding back"
                     best_successor, min_cost = (successor0, cost0)
 
                 else:
+                    #print "choose to delete"
                     best_successor, min_cost = (successor1, cost1)
+                    #print "s"
 
+    # print "returning successor with length"
+    # print len(get_flat_courses(best_successor))
     return (best_successor, min_cost)
 
 # A state is a list of value indices.
 # Randomly picks value indices until the weight limit is reached
-def get_successor_type(assignment, weights, semester_index, change_type=0):
+def get_successor_type(assignment, weights, semester_index, change_type):
 
     #  add course (type 0), delete course (type 1)
-
+    # print "my assignment has len: ", len(get_flat_courses(assignment))
     if change_type == 0:
         if len(assignment[semester_index]) == 4: # can't add if taking 4 courses
             return (None, float("inf"))
@@ -49,49 +55,46 @@ def get_successor_type(assignment, weights, semester_index, change_type=0):
         possible_assignments = map(lambda x: add_to_assignment(assignment, semester_index, x), possible_courses)
 
     else:
+        # print len(assignment[semester_index])
         if len(assignment[semester_index]) == 0:  # can't mutate/delete if no course to pick
             return (None, float("inf"))
 
         possible_course_indices = range(len(assignment[semester_index]))
+        # print "mutating assignments"
         possible_assignments = map(lambda x: del_to_assignment(assignment, semester_index, x), possible_course_indices)
 
     if len(possible_assignments) == 0:
-            return (None, float("inf"))
+        return (None, float("inf"))
     
     assignment_costs = map(lambda x: (x, get_cost(x, weights)), possible_assignments)
+    # print map(lambda x: x[1], assignment_costs)
+    # print "returning successor len: ", len(get_flat_courses(min(assignment_costs, key = lambda (x,c): c)[0]))
     return min(assignment_costs, key = lambda (x,c): c)
 
 def general_hill_climbing(successor_fun, weights, MAX_NUM_SIDEWAYS = 100, assignment = None):
-    # print "In Sideways HC, #sideways = ", MAX_NUM_SIDEWAYS
-    print "WEIGHTS", weights
-    num_iter     = 0
+    #print "in general hill climbing"
+
+    start_time = time.time()
     num_sideways = 0
-    num_plateux  = 0
-    total_sideways_steps = 0
+    num_iter = 0
 
     if not assignment:
         assignment = get_random_assignment()
+    
     # LATER TESTING & GRAPHS
-    initial_cost = get_cost(assignment, weights)
-    curr_cost = initial_cost
-
-    trace = [assignment]
-    cost_trace = [initial_cost]
-
-    def get_avg_num_sideways():
-        return 0 if num_plateux == 0 else (total_sideways_steps * 1.0)/num_plateux
-
+    curr_cost = get_cost(assignment, weights)
+    cost_trace = [curr_cost]
 
     while True:
         successor, successor_cost = successor_fun(assignment, weights)
-
-        trace.append(successor)
+        # print "successor cost: ", successor_cost
         cost_trace.append(successor_cost)
 
         # assignment is local maximum, not a shoulder
         if successor == assignment:
-            return (assignment, initial_cost, curr_cost, MAX_NUM_SIDEWAYS, \
-                        num_iter, num_plateux, get_avg_num_sideways())
+            # print "in here"
+            time_elapsed = round(time.time() - start_time, 2)
+            return (assignment, cost_trace, num_iter, time_elapsed)
 
         # all good! hill-climb to neighbor
         if successor_cost < curr_cost:
@@ -106,14 +109,14 @@ def general_hill_climbing(successor_fun, weights, MAX_NUM_SIDEWAYS = 100, assign
                 num_sideways = 0
 
         # in a shoulder, check if we can go sideways
-        if successor_cost == curr_cost:
-            if num_sideways < MAX_NUM_SIDEWAYS:
+        else:
+            if successor_cost == curr_cost and num_sideways < MAX_NUM_SIDEWAYS:
                 assignment = successor
                 num_iter += 1
                 num_sideways += 1
             else: # no escaping the plateux
-                return (assignment, initial_cost, curr_cost, MAX_NUM_SIDEWAYS, \
-                            num_iter, num_plateux, get_avg_num_sideways())
+                time_elapsed = round(time.time() - start_time, 2)
+                return (assignment, cost_trace, num_iter, time_elapsed)
 
 
 def sideways_hill_climbing(weights, MAX_NUM_SIDEWAYS = 100, assignment = None):
@@ -121,7 +124,8 @@ def sideways_hill_climbing(weights, MAX_NUM_SIDEWAYS = 100, assignment = None):
   
 # no sideway steps allowed
 def naive_hill_climbing(weights, assignment = None):
-    return sideways_hill_climbing(weights, MAX_NUM_SIDEWAYS = 0, assignment = None)
+    print "in naive hill climbing"
+    return sideways_hill_climbing(weights, 0, assignment)
 
 # print stats
 # print("Local Search Algorithm: Initial Cost: {}. Final Cost: {}.\n Assignment:{}".format(initial_cost, curr_cost, assignment))

@@ -61,6 +61,19 @@ def get_courses_dict():
 
             courses[course] = row
 
+
+# overwrites
+def list_to_csv(csv_list, filename):
+    if len(csv_list) == 0:
+        return
+
+    with open(filename, 'wb') as f:  # Just use 'w' mode in 3.x
+        writer = csv.DictWriter(f, csv_list[0].keys())
+        writer.writeheader()
+        writer.writerows(csv_list)
+
+# adict = [{"alg1": 5, "alg2": 6},{"alg1": 1, "alg2": 3}, {"alg1": 2, "alg2": 4}] 
+# dict_to_csv(adict, "t.csv")
 # get_courses_dict()
 # prereq_dict = dict()
 # print dict(courses)

@@ -11,6 +11,9 @@ from copy           import deepcopy
 def coin_flip(p):
     return random() <= p
 
+def get_random_weights():
+    return [random() for _ in range(4)]
+
 # returns whether course1 and course2 overlap in time
 def overlap(course1, course2):
 
@@ -83,3 +86,11 @@ def get_random_assignment():
             if len(assignment[semester_index]) == 4:
                 free_semesters.remove(semester_index)
     return assignment
+
+# print "hi"
+# a = [['MATH25A', 'CS182', 'MATH55A', 'CS126'], ['MATH23B', 'CS148', 'CS152', 'MATH55B'], ['CS121', 'CS171', 'CS175', 'CS134'], ['CS179', 'AM107', 'MATH25B', 'AM21B'], ['CS143', 'CS108', 'CS165', 'CS061'], ['CS051', 'CS144R', 'CS109B', 'CS189'], ['CS141', 'CS096', 'CS136', 'CS050'], ['CS181', 'AM120', 'STAT121B', 'CS124']]
+# print len(get_flat_courses(a))
+# b = del_to_assignment(a, 0, 0)
+# print len(get_flat_courses(b))
+# b = del_to_assignment(b, 0, 0)
+# print len(get_flat_courses(b))

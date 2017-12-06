@@ -23,18 +23,21 @@ def random_restart(alg, weights, MAX_NUM_SIDEWAYS):
     time_elapsed = round(time.time() - start_time, 2)
     return (num_iter, time_elapsed)
 
-def limited_random_restart(alg, weights, MAX_NUM_SIDEWAYS, MAX_NUM_RESTARTS):
-    print "in limited rr"
+def limited_random_restart(alg, weights, MAX_NUM_SIDEWAYS=0, MAX_NUM_RESTARTS=20):
+    print "in limited random restart. #restarts = ", MAX_NUM_RESTARTS
     start_time = time.time()
     num_iter = 0
 
-    res = alg(weights, MAX_NUM_SIDEWAYS)
-    best_state, best_cost = res[0], res[2]
+    best_state, cost_trace, indiv_num_iter, indiv_time_elapse = alg(weights, MAX_NUM_SIDEWAYS)
+    best_cost = cost_trace[-1]
+
+    #print "cost, ", cost_trace
 
     while num_iter < MAX_NUM_RESTARTS and best_cost != 0:
-        # print "Iter %d: cost = %f" % (num_iter, best_cost)
-        res = alg(weights, MAX_NUM_SIDEWAYS)
-        state, cost = res[0], res[2]
+        #print "Iter %d: cost = %f" % (num_iter, best_cost)
+        state,cost_trace, indiv_num_iter, indiv_time_elapsed = alg(weights, MAX_NUM_SIDEWAYS)
+        cost = cost_trace[-1]
+        #print "cost, ", cost_trace
 
         # keep moving
         if cost <= best_cost:
@@ -43,11 +46,9 @@ def limited_random_restart(alg, weights, MAX_NUM_SIDEWAYS, MAX_NUM_RESTARTS):
         num_iter += 1
 
     time_elapsed = round(time.time() - start_time, 2)
-    print "time: ", time_elapsed, "num_iter: ", num_iter, ", best cost: ", best_cost
-    return (best_state, time_elapsed, num_iter, MAX_NUM_RESTARTS)
+    return (best_state, cost_trace, num_iter, time_elapsed)
 
 def random_restart_sideways_hc():
-    print "in restract sideways hc"
     return random_restart(sideways_hill_climbing, [1, 0, 0, 0, 0], MAX_NUM_SIDEWAYS = 0)
 
 # print(timeit.timeit(random_restart_sideways_hc))

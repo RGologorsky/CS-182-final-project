@@ -5,6 +5,7 @@ from cost_functions import *
 import random
 import matplotlib.pyplot as plt
 
+import time
 # returns random neighbor. Neighbor is an assignment were one class is added/dropped
 def get_random_neighbor(assignment):
     change_type = randint(0,1) # 0 = add course, 1 = delete course
@@ -70,21 +71,21 @@ def get_random_neighbor(assignment):
     return del_to_assignment(assignment, semester_index, randint(0, -1 + len(assignment[semester_index])))
 
 def simulated_annealing(weights, assignment = None):
+  start_time = time.time()
 
   curr_state = assignment if assignment else get_random_assignment()
+  curr_cost = get_cost(curr_state, weights)
 
-  initial_cost = get_cost(curr_state, weights)
-  curr_cost = initial_cost
-
-  trace      = [curr_state]
-  cost_trace = [initial_cost]
+  cost_trace = [curr_cost]
 
   T = 1.0
-  alpha = 0.99
+  alpha = 0.999
+  MAX_ITER = 5000
 
-  for t in xrange(10000):
+  for t in xrange(MAX_ITER):
       if int(curr_cost) == 0:
-        return (curr_state, "filler1", curr_cost)
+        time_elapsed = round(time.time() - start_time, 2)
+        return (curr_state, cost_trace, n, time_elapsed)
 
       neighbor = get_random_neighbor(curr_state)
       neighbor_cost = get_cost(neighbor, weights)
@@ -96,13 +97,8 @@ def simulated_annealing(weights, assignment = None):
       if delta_E > 0 or coin_flip(switch_probability):
           curr_state, curr_cost = neighbor, neighbor_cost
 
-      trace.append(curr_state)
       cost_trace.append(curr_cost)
       T = alpha * T
 
-  # print stats
-  print_assignment(curr_state)
-  print("SA Algorithm: Initial Cost: {}. Final Cost: {}.\n Assignment:{}".format(initial_cost, curr_cost, curr_state))
-  plt.plot(SA_trace, label="SA")
-  # return a trace of values resulting from your simulated annealing
-  return (curr_state, "filler1", curr_cost)
+  time_elapsed = round(time.time() - start_time, 2)
+  return (curr_state, cost_trace, MAX_ITER, time_elapsed)
