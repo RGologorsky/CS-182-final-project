@@ -176,7 +176,7 @@ def sideways_first_choice(weights, MAX_NUM_SIDEWAYS = 100, assignment = None):
   
 # no sideway steps allowed
 def naive_first_choice(weights, assignment = None):
-    return sideways_first_choice(weights, MAX_NUM_SIDEWAYS = 0, assignment = None)
+    return sideways_first_choice(weights, 0, assignment)
 
 # print stats
     # print("First-Choice Algorithm: Initial Cost: {}. Final Cost: {}.\n Assignment:{}".format(initial_cost, curr_cost, assignment))

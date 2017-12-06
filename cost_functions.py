@@ -78,8 +78,8 @@ def get_prereq_cost(assignment, printing=False):
 
 def get_workload_variation_cost(assignment, printing = False):
     # print "hi, printing: ", str(printing)
-    if printing:
-        print("assignment: ", assignment)
+    #if printing:
+    #    print("assignment: ", assignment)
 
     courses = get_flat_courses(assignment)
     if len(courses) == 0:

@@ -85,7 +85,7 @@ def simulated_annealing(weights, assignment = None):
   for t in xrange(MAX_ITER):
       if int(curr_cost) == 0:
         time_elapsed = round(time.time() - start_time, 2)
-        return (curr_state, cost_trace, n, time_elapsed)
+        return (curr_state, cost_trace, t, time_elapsed)
 
       neighbor = get_random_neighbor(curr_state)
       neighbor_cost = get_cost(neighbor, weights)

@@ -100,7 +100,7 @@ def test_mutate_first_choice():
     print "\n"
     get_costs(new_assignment[0], weights, printing=True)
 
-test_mutate_first_choice()
+# test_mutate_first_choice()
 
 def test_get_successors():
     assignment = [
@@ -120,14 +120,17 @@ def test_get_successors():
 # test_get_successors()
 #from simulated_annealing import *
 # ONLY COURSE REQ ===> weights = [0, 0, 0, 0]
-def compare_naive_algs():
-    MAX_NUM_SIDEWAYS = 0
-    MAX_NUM_RESTARTS = 10
+# def get_avg(NUM_REPEATS):
+#     avg_cost_trace = None
+#     avg_time_elapsed = 
+#     for i in NUM_REPEATS:
 
-    NUM_REPEATS = 5 # TODO
+
+def compare_naive_algs(file_index):
     # compare avg. costs of sol
-
+    file_name = "naive_algs" + str(file_index) + ".csv"
     results = []
+    NUM_REPEATS = 20
 
     weights = get_random_weights()
     assignment = get_random_assignment()
@@ -140,8 +143,13 @@ def compare_naive_algs():
                     naive_first_choice,
                     simulated_annealing]
     NAMES = ["Naive HC-1", "Naive HC-2", "Naive FC-2", "SA"]
+    # for i in range(len(NAMES)):
+    #     NAMES[i] = NAMES[i]
+
+
     for alg in NAIVE_ALGS:
         (_, cost_trace, num_iter, time_elapsed) = alg(weights, assignment)
+
         all_cost_traces.append(cost_trace)
         all_times.append(time_elapsed)
         all_num_iter.append(num_iter)
@@ -166,7 +174,7 @@ def compare_naive_algs():
                 row_dict[name] = all_cost_traces[alg_index][i]
         csv_list.append(row_dict)
 
-    list_to_csv(csv_list, "naive_algs.csv")
+    list_to_csv(csv_list, file_name)
 
 
     # DO 1-ITER
@@ -176,10 +184,62 @@ def compare_naive_algs():
     # COMPARE WITH REPEATED ITER
 
 
+def many_compare_naive_algs():
+    for i in xrange(3):
+        compare_naive_algs(file_index=i)
+
+def compare_random_restarts(file_index):
+    # compare avg. costs of sol
+    file_name = "random_restarts" + str(file_index) + ".csv"
+    results = []
+    MAX_NUM_RESTARTS = 20
+
+    weights = get_random_weights()
+    assignment = get_random_assignment()
+
+    all_cost_traces = []
+    all_times = []
+    all_num_iter = []
+
+    NAIVE_ALGS = [naive_hill_climbing, naive_hill_climbing2, 
+                    naive_first_choice,
+                    simulated_annealing]
+    NAMES = ["Naive HC-1", "Naive HC-2", "Naive FC-2", "SA"]
+    # for i in range(len(NAMES)):
+    #     NAMES[i] = NAMES[i]
 
 
+    for alg in NAIVE_ALGS:
+        (_, cost_trace, num_iter, time_elapsed) = limited_random_restart(alg, weights, assignment, MAX_NUM_RESTARTS)
 
+        all_cost_traces.append(cost_trace)
+        all_times.append(time_elapsed)
+        all_num_iter.append(num_iter)
 
+    print "all_times: "
+    print all_times
+
+    def safely_get_value(i, alg_index):
+        if i >= len(all_cost_traces[alg_index]):
+            return 0
+        return all_cost_traces[alg_index][i]
+
+    csv_list = []
+    max_num_iter = max(all_num_iter)
+    for i in xrange(max_num_iter):
+        row_dict = {}
+        row_dict["Iter"] = i
+
+        for alg_index in xrange(len(NAIVE_ALGS)):
+            name = NAMES[alg_index]
+            if i < len(all_cost_traces[alg_index]):
+                row_dict[name] = all_cost_traces[alg_index][i]
+        csv_list.append(row_dict)
+
+    list_to_csv(csv_list, file_name)
+
+# many_compare_naive_algs()
+compare_random_restarts(file_index=0)
 # result = limited_random_restart(sideways_first_choice, weights, MAX_NUM_SIDEWAYS, MAX_NUM_RESTARTS)
 # print result
 
