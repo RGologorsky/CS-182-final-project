@@ -18,69 +18,135 @@ from local_search_restricted_successors import general_hill_climbing
 
 
 # returns the greedy - lowest cost - successor state.
+def get_best_add_successor(assignment, weights, add_index):
+    if len(assignment[add_index]) == 4: # can't add if taking 4 courses
+        return (None, float("inf"))
+
+    possible_adds = new_course_domain(add_index, assignment)
+    new_assignments = map(lambda x: add_to_assignment(assignment, add_index, x), possible_adds)
+
+    if len(new_assignments) == 0:
+        return (None, float("inf"))
+
+    costs = map(lambda x: (x, get_cost(x, weights)), new_assignments)
+    return min(costs, key = lambda (x,c): c)
+
+def get_best_del_successor(assignment, weights, del_index):
+    if len(assignment[del_index]) == 0: # can't del if taking 0 courses
+        return (None, float("inf"))
+
+    possible_dels = range(len(assignment[del_index]))
+    new_assignments = map(lambda x: del_to_assignment(assignment, del_index, x), possible_dels)
+
+    if len(new_assignments) == 0:
+        return (None, float("inf"))
+
+    assignment_costs = map(lambda x: (x, get_cost(x, weights)), new_assignments)
+    return min(assignment_costs, key = lambda (x,c): c)
+
+# given a good add index anda  good delete index.
+def get_best_mut_successor(assignment, weights, add_index, del_index):
+    # if full at semester add index or empty at delete index, 
+    # simplifies to pure add/del. Else: first del, then add.
+
+    possible_dels = range(len(assignment[del_index]))
+    del_assignments = map(lambda x: del_to_assignment(assignment, del_index, x), possible_dels)
+
+    if len(del_assignments) == 0:
+        return (None, float("inf"))  
+
+    curr_best_cost = float("inf")
+    curr_best_mut = None
+    for  del_assignment in del_assignments:
+        possible_adds = new_course_domain(add_index, del_assignment)
+        add_assignments = map(lambda x: add_to_assignment(del_assignment, add_index, x), possible_adds)
+        for mut in add_assignments:
+            mut_cost = get_cost(mut, weights)
+            if mut_cost < curr_best_cost:
+                curr_best_cost = mut_cost
+                curr_best_mut  = mut
+    return curr_best_mut, curr_best_cost
+
+
+
 def get_greedy_successor2(assignment, weights):
 
     min_cost = get_cost(assignment, weights)
     best_successor = assignment
 
-    for semester_index in xrange(8):
-            # successors: (0) add, (1) delete course from semester
-            successor0, cost0 = get_successor_type2(assignment, weights, semester_index, 0)
-            successor1, cost1 = get_successor_type2(assignment, weights, semester_index, 1)
-            successor2, cost2 = get_successor_type2(assignment, weights, semester_index, 2)
+    # check mutation: add from any, delete from any (including just add/del)
+    for add_index in xrange(-1,8):
+        for del_index in xrange(-1,8):
+            
+            if add_index == -1 and del_index == -1:
+                cost = min_cost
+            
+            elif add_index == -1 or len(assignment[add_index]) == 4:
+                successor, cost = \
+                    get_best_del_successor(assignment, weights, del_index)
+            
+            elif del_index == -1 or len(assignment[del_index]) == 0:
+                successor, cost = \
+                     get_best_add_successor(assignment, weights, add_index)
+            
+            else:
+                successor, cost = \
+                    get_best_mut_successor(assignment, weights, add_index, del_index)
 
-            if min(cost0, cost1, cost2) <= min_cost:
-                if cost0 < cost1 and cost0 < cost2:
-                    best_successor, min_cost = (successor0, cost0)
-                elif cost1 < cost0 and cost1 < cost2:
-                    best_successor, min_cost = (successor1, cost1)
-                else:
-                    best_successor, min_cost = (successor2, cost2)
+            if cost < min_cost:
+                best_successor, min_cost = (successor, cost)
 
     return (best_successor, min_cost)
 
 # returns lowest cost successor state of given action - add, mutate, delete
-def get_successor_type2(assignment, weights, semester_index, change_type=0):
+def get_successor_type2(assignment, weights, add_index, del_index, change_type):
 
     #  add course (type 0), delete course (type 1), muate course (type 2)
 
     if change_type == 0: # adding a course
-        if len(assignment[semester_index]) == 4: # can't add if taking 4 courses
+        if len(assignment[add_index]) == 4: # can't add if taking 4 courses
             return (None, float("inf"))
 
-        possible_courses = new_course_domain(semester_index, assignment)
-        possible_assignments = map(lambda x: add_to_assignment(assignment, semester_index, x), possible_courses)
-        
+        possible_courses = new_course_domain(add_index, assignment)
+        possible_assignments = map(lambda x: add_to_assignment(assignment, add_index, x), possible_courses)
+
         if len(possible_assignments) == 0:
             return (None, float("inf"))
-        
+
         assignment_costs = map(lambda x: (x, get_cost(x, weights)), possible_assignments)
         return min(assignment_costs, key = lambda (x,c): c)
 
-    if change_type == 1 or change_type == 2: 
-        if len(assignment[semester_index]) == 0: # can't mutate/delete if none
+    if change_type == 1: # deleting a course
+        if len(assignment[del_index]) == 0: # can't delete if none
             return (None, float("inf"))
 
         # possibilities for the course index to delete.
-        possible_course_indices = range(len(assignment[semester_index]))
-        possible_assignments = map(lambda x: del_to_assignment(assignment, semester_index, x), possible_course_indices)
-        
+        possible_course_indices = range(len(assignment[del_index]))
+        possible_assignments = map(lambda x: del_to_assignment(assignment, del_index, x), possible_course_indices)
+
         if len(possible_assignments) == 0:
             return (None, float("inf"))
 
-        if change_type == 1: # if just delete, we are done.
-            assignment_costs = map(lambda x: (x, get_cost(x, weights)), possible_assignments)
-            return min(assignment_costs, key = lambda (x,c): c)
+        assignment_costs = map(lambda x: (x, get_cost(x, weights)), possible_assignments)
+        return min(assignment_costs, key = lambda (x,c): c)
 
-        # for mutation, we now check best add state.
-        possible_add_assignment_costs = map(lambda a: get_successor_type2(a, weights, semester_index, 0), possible_assignments)
-        return min(possible_add_assignment_costs, key = lambda (x,c): c)
+    if change_type == 2: # mutation: = delete from possible deletes, then add
 
+        # for mutation, we get delete states and add over deletes.
+        # possibilities for the course index to delete.
+        possible_course_indices = range(len(assignment[del_index]))
+        if len(possible_course_indices) == 0: # empty assignment
+            return (None, float("inf"))
+
+        possible_assignments = map(lambda x: del_to_assignment(assignment, del_index, x), possible_course_indices)
+
+        add_assignment_costs = map(lambda a: get_successor_type2(a, weights, add_index, -1, 0), possible_assignments)
+        return min(add_assignment_costs, key = lambda (x,c): c)
 
 # we allow sideways movements to overcome plateux
 def sideways_hill_climbing2(weights, MAX_NUM_SIDEWAYS = 100, assignment = None):
     return general_hill_climbing(get_greedy_successor2, weights, MAX_NUM_SIDEWAYS, assignment)
-  
+
 # no sideway steps allowed
 def naive_hill_climbing2(weights, assignment = None):
     return sideways_hill_climbing2(weights, 0, assignment)

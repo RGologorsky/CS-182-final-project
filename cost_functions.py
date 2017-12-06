@@ -3,7 +3,7 @@ from constants import *
 from helpers import *
 from math import pow
 
-MAX_WEIGHT = 100 # 
+MAX_WEIGHT = 100 #
 MIN_WEIGHT = 0.01
 
 # for feature normalization
@@ -17,16 +17,20 @@ def normalize(cost, feature):
     return (cost - (MEANS[i]))/STD[i]
 
 def get_flat_courses(assignment):
-    return [course for semester in assignment for course in semester]
+    try:
+        return [course for semester in assignment for course in semester]
+    except:
+        print "FAILED FAILED ", assignment
+        return [course for semester in assignment for course in semester]
 
 def get_cost(assignment, weights):
     cost_list = get_costs(assignment, weights)
     # print "Cost list", cost_list
     # print "Weights", weights
     indices = range(len(weights))
-    #print "cost ", sum(map(lambda i: weights[i] * cost_list[i], indices)) 
+    #print "cost ", sum(map(lambda i: weights[i] * cost_list[i], indices))
 
-    return sum(map(lambda i: weights[i] * cost_list[i], indices)) 
+    return sum(map(lambda i: weights[i] * cost_list[i], indices))
 
 
 def get_costs(assignment, weights, printing=False):
@@ -73,34 +77,50 @@ def get_prereq_cost(assignment, printing=False):
     return num_violated # feature scaling, (x - min)/s.d.
 
 def get_workload_variation_cost(assignment, printing = False):
-    printing = False
+    # print "hi, printing: ", str(printing)
+    if printing:
+        print("assignment: ", assignment)
+
+    courses = get_flat_courses(assignment)
+    if len(courses) == 0:
+        return 0
+    semester_hrs = []
+    for semester in assignment:
+        hrs = sum(map(lambda c: get_feature_cost(c, "WORKLOAD"), semester))
+        semester_hrs.append(hrs)
+
+    return max(semester_hrs) - min(semester_hrs)
+    #avg_semester_hours = sum(semester_hrs)/8.0
+    #return (max(semester_hrs) - min(hrs))
+    # return len(filter(lambda x: x > 2 * MEANS[NORM_INDICES["WORKLOAD"]], hrs))
+    #printing = False
 
     courses = get_flat_courses(assignment)
     hrs = map(lambda c: get_feature_cost(c, "WORKLOAD"), courses)
     total_hrs = sum(hrs)
-    
-    avg_hours = total_hrs/len(courses)
+
+    avg_hours = total_hrs/len(courses) if len(courses) != 0 else 0
     my_avg_semester_len = sum(map(lambda semester: len(semester), assignment))/8
     my_avg_semester_hours = avg_hours * my_avg_semester_len
     avg_semester_hours = avg_hours * 2 # say 2 class avg
 
     # add variances
     total_variance = 0
-    
+
     if printing:
         print "Avg. Semester Workload : %2.2f. " % my_avg_semester_hours,
 
-    res = "("    
+    res = "("
     for index, semester in enumerate(assignment):
         semester_hours = sum(map(lambda c: get_feature_cost(c, "WORKLOAD"), semester))
         res += str(semester_hours)
         res += ", " if index < 7 else "."
         total_variance += pow((semester_hours - my_avg_semester_hours),2)
     avg_variance_per_semester = total_variance/8
-    
+
     if printing:
         print res + "). " + ("Avg. Variation (hours): %2.2f." % avg_variance_per_semester)
-    
+
     # AVG VAR, AVG STD VAR
     AVG_SEM_VAR = 43.20732231       # x 4? semester = sum 4 class's var
     AVG_SEM_STD_VAR = 3.720555031  * 2  # x 2? sqrt(4) = 2?
@@ -110,48 +130,54 @@ def get_workload_cost(assignment, printing=False):
     courses = get_flat_courses(assignment)
     hrs = map(lambda c: get_feature_cost(c, "WORKLOAD"), courses)
     total_hrs = sum(hrs)
-    
-    avg_hours = total_hrs/len(courses)
+
+    avg_hours = total_hrs/len(courses) if len(courses) > 0 else 0
     my_avg_semester_len = sum(map(lambda semester: len(semester), assignment))/8
     my_avg_semester_hours = avg_hours * my_avg_semester_len
     avg_semester_hours = avg_hours * 2 # say 2 class avg
 
     # add variances
     total_variance = 0
-    
+
     if printing:
         s = "Avg. Semester Workload"
         print "%-25s : %2.2f. " % (s,my_avg_semester_hours),
 
-    res = "("    
+    res = "("
     for index, semester in enumerate(assignment):
         semester_hours = sum(map(lambda c: get_feature_cost(c, "WORKLOAD"), semester))
         res += str(semester_hours)
         res += ", " if index < 7 else "."
         total_variance += pow((semester_hours - my_avg_semester_hours),2)
     avg_variance_per_semester = total_variance/8
-    
+
     if printing:
         print res + "). " + ("Avg. Variation (hours): %2.2f." % avg_variance_per_semester)
-    
+
     # AVG VAR, AVG STD VAR
     AVG_SEM_VAR = 43.20732231       # x 4? semester = sum 4 class's var
     AVG_SEM_STD_VAR = 3.720555031  * 2  # x 2? sqrt(4) = 2?
     return normalize(avg_hours, "WORKLOAD")
 
 def get_q_cost(courses, printing=False):
-    avg_q_cost = sum(map(lambda c: 5 - get_feature_cost(c, "Q"), courses))/len(courses)
+    if len(courses) > 0:
+        avg_q_cost = sum(map(lambda c: 5 - get_feature_cost(c, "Q"), courses))/len(courses)
+    else:
+        avg_q_cost = 0
     if printing:
         s = "Avg. Q-Score"
         print "%-25s: %2.2f" % (s, 5- avg_q_cost)
     return (avg_q_cost - (5 - MEANS[0]))/STD[NORM_INDICES["Q"]]
-    
+
 def get_enrollment_cost(courses, printing=False):
-    avg_enrollment = sum(map(lambda c: get_feature_cost(c, "ENROLLMENT"), courses))/len(courses)
+    if len(courses) > 0:
+        avg_enrollment = sum(map(lambda c: get_feature_cost(c, "ENROLLMENT"), courses))/len(courses)
+    else:
+        avg_enrollment = 0
     if printing:
         s = "Avg. Enrollment"
         print "%-25s: %2.2f" % (s, avg_enrollment)
-    return (avg_enrollment - 20)/STD[NORM_INDICES["ENROLLMENT"]] 
+    return (avg_enrollment - 20)/STD[NORM_INDICES["ENROLLMENT"]]
 
 # course requirement cost
 # def get_req_cost(assignment):
@@ -159,7 +185,7 @@ def get_enrollment_cost(courses, printing=False):
 #     return math_cost(courses)[0] + software_cost(courses)[0] \
 #            + theory_cost(courses)[0] \
 #            + technical_and_breadth_cost(courses)[0]
-       
+
 
 
 # COURSE REQUIREMENT COSTS
@@ -171,24 +197,24 @@ def math_cost(courses):
     lin_alg    = ["AM21A","MATH21A", "MATH23B","MATH25B", "MATH55B"]
     multi_calc = ["AM21B","MATH21B", "MATH23A","MATH25A", "MATH55A"]
 
-    my_lin_alg    = common(lin_alg, courses) 
-    my_multi_calc = common(multi_calc, courses) 
+    my_lin_alg    = common(lin_alg, courses)
+    my_multi_calc = common(multi_calc, courses)
 
     cost = 2
 
-    used_to_satisfy = []    
-    if len(my_lin_alg) >= 1: 
+    used_to_satisfy = []
+    if len(my_lin_alg) >= 1:
         used_to_satisfy.append(my_lin_alg.pop())
         cost -= 1
 
-    if len(my_multi_calc) >= 1: 
+    if len(my_multi_calc) >= 1:
         used_to_satisfy.append(my_multi_calc.pop())
         cost -= 1
 
     #extra = my_lin_alg | my_multi_calc
     #return (cost, used_to_satisfy, extra)
     return (cost, used_to_satisfy)
-    
+
 def software_cost(courses):
     software = ["CS050", "CS051", "CS061"]
     used_to_satisfy = []
@@ -202,7 +228,7 @@ def software_cost(courses):
             if cost == 0:
                 return (cost, used_to_satisfy)
     return (cost, used_to_satisfy)
-   
+
 
 def theory_cost(courses):
     def is_theory_class(x):
@@ -251,9 +277,9 @@ def technical_and_breadth_cost(courses):
     used_to_satisfy = []
     my_penultimates = []
 
-    def valid_breadth(penultimate): 
+    def valid_breadth(penultimate):
         return penultimate not in my_penultimates and penultimate not in ["0", "2", "9"]
-    
+
     technical_cost = 4
     breadth_cost = 2
 
@@ -291,7 +317,7 @@ def technical_and_breadth_cost(courses):
             used_to_satisfy.append("CS051")
             breadth_cost -= 1
             technical_cost = max(0, technical_cost - 1)
-        
+
         elif breadth_cost > 0 and "6" not in my_penultimates:
                 my_penultimates.append("6")
                 used_to_satisfy.append("CS061")

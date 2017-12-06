@@ -21,7 +21,7 @@ NAMES= ["Sideways HC-1", "HC-1",
 META = [limited_random_restart]
 
 MAX_NUM_SIDEWAYS = 0 
-MAX_NUM_RESTARTS = 20
+MAX_NUM_RESTARTS = 1
 
 MAX_WEIGHT = 100
 MIN_WEIGHT = 0.01
