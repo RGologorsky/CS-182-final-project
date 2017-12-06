@@ -24,7 +24,7 @@ def random_restart(alg, weights, MAX_NUM_SIDEWAYS):
     return (num_iter, time_elapsed)
 
 def limited_random_restart(alg, weights, MAX_NUM_SIDEWAYS=0, MAX_NUM_RESTARTS=20):
-    print "in limited random restart. #restarts = ", MAX_NUM_RESTARTS
+    print "in limited random restart. #restarts = ", MAX_NUM_RESTARTS - 1
     start_time = time.time()
     num_iter = 0
 

@@ -14,10 +14,11 @@ ALGS = [sideways_hill_climbing, naive_hill_climbing,
         sideways_first_choice, naive_first_choice,
         simulated_annealing]
 
-NAMES= ["Sideways HC-1", "HC-1",
-        "Sideways HC-2", "HC-2",
-        "Sideways FC HC-2", "Sideways FC", "FC HC-2",
-        simulated_annealing]
+NAMES= ["Sideways Greedy HC-1", "Greedy HC-1",
+        "Sideways Greedy HC-2", "Greedy HC-2",
+        "Sideways First Choice HC-2", "First Choice HC-2",
+        "Simulated Annealing"]
+
 META = [limited_random_restart]
 
 MAX_NUM_SIDEWAYS = 0 
@@ -39,6 +40,27 @@ def get_valid_weights():
 
     return weights
 
+def chooose_alg():
+    print "Algorithm Options: "
+    print str(NAMES)
+    alg_index = None
+    while not alg_index or alg_index < 0 or alg_index >= len(NAMES):
+        try:
+            alg_index = int(raw_input("Please enter the index of the alg. you'd like to try (recommend FC HC-2, index 5): "))
+        except:
+            pass
+    return ALGS[alg_index]
+
+def chooose_num_restarts():
+    s = "Please enter the #alg iterations (random restart). (1 alg iter = no restarts): "
+    num_restarts = None
+    while not num_restarts or num_restarts < 1:
+        try:
+            num_restarts = int(raw_input(s))
+        except:
+            pass
+    return num_restarts
+
 def interact():
     quit = False
 
@@ -52,26 +74,26 @@ def interact():
 
     # maybe? normalize wts, so cost func. not too high. Easier to graph then.
     while not quit:
-        res = limited_random_restart(naive_first_choice, weights, \
-                                            MAX_NUM_SIDEWAYS, MAX_NUM_RESTARTS)
+        alg = chooose_alg()
+        num_restarts = chooose_num_restarts()
+
+        res = limited_random_restart(alg, weights, \
+                                            MAX_NUM_SIDEWAYS, num_restarts)
         print_user(res)
-        print("\n")
-        c =get_costs(res[0], weights, printing=True)
-        print "Costs: ", c
-        next_step = raw_input("Hope you liked it! Choose c = Continue, r = Restart, q = Quit: ")
+        print("Hope you liked it!\n")
+        
+        next_step = ""
+        while next_step not in ["q", "r", "c"]:
+            next_step = raw_input("Choose c = Continue (re-run alg w/same weights), r = Restart (new weights), q = Quit: ")
 
         if next_step == "q":
             quit = True
         
-        elif next_step == "r":
+        if next_step == "r":
             weights = get_valid_weights()
         
-        elif next_step == "c":
-            pass
         
-        else:
-            next_step = raw_input("Options: Continue, r = Restart, q = Quit: ")
-
+        
 def main():
     interact()
 
