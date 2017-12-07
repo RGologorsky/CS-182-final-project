@@ -103,5 +103,5 @@ def sideways_hill_climbing2(weights, MAX_NUM_SIDEWAYS = 100, assignment = None):
     return general_hill_climbing(get_greedy_successor2, weights, MAX_NUM_SIDEWAYS, assignment)
 
 # no sideway steps allowed
-def naive_hill_climbing2(weights, assignment = None):
+def naive_hill_climbing2(weights, assignment = None, MAX_NUM_SIDEWAYS=0):
     return sideways_hill_climbing2(weights, 0, assignment)

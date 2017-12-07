@@ -63,12 +63,14 @@ def get_courses_dict():
 
 
 # overwrites
-def list_to_csv(csv_list, filename):
+def list_to_csv(csv_list, filename, headers=None):
     if len(csv_list) == 0:
         return
+    if not headers:
+        headers = csv_list[0].keys()
 
     with open(filename, 'wb') as f:  # Just use 'w' mode in 3.x
-        writer = csv.DictWriter(f, csv_list[0].keys())
+        writer = csv.DictWriter(f, headers)
         writer.writeheader()
         writer.writerows(csv_list)
 

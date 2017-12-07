@@ -24,7 +24,7 @@ NAMES= ["Sideways Greedy HC-1", "Greedy HC-1",
 META = [limited_random_restart]
 
 MAX_NUM_SIDEWAYS = 0 
-MAX_NUM_RESTARTS = 1
+MAX_NUM_ITER = 1
 
 MAX_WEIGHT = 100
 MIN_WEIGHT = 0.01
@@ -54,7 +54,7 @@ def chooose_alg():
     return ALGS[alg_index]
 
 def chooose_num_restarts():
-    s = "Please enter the #alg iterations (random restart). (1 alg iter = no restarts): "
+    s = "Please enter #random restarts (0 = no restarts = 1 alg iter): "
     num_restarts = None
     while not num_restarts or num_restarts < 1:
         try:

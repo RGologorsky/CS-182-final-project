@@ -154,7 +154,7 @@ def sideways_first_choice2(weights, MAX_NUM_SIDEWAYS = 100, assignment = None):
     return general_hill_climbing(get_first_choice_successor2, weights, MAX_NUM_SIDEWAYS, assignment)
   
 # no sideway steps allowed
-def naive_first_choice2(weights, assignment = None):
+def naive_first_choice2(weights, assignment = None, MAX_NUM_SIDEWAYS=0):
     return sideways_first_choice2(weights, 0, assignment)
 
 # we allow sideways movements to overcome plateux
@@ -162,7 +162,7 @@ def sideways_first_choice(weights, MAX_NUM_SIDEWAYS = 100, assignment = None):
     return general_hill_climbing(get_first_choice_successor1, weights, MAX_NUM_SIDEWAYS, assignment)
   
 # no sideway steps allowed
-def naive_first_choice(weights, assignment = None):
+def naive_first_choice(weights, assignment = None, MAX_NUM_SIDEWAYS=0):
     return sideways_first_choice(weights, 0, assignment)
 
 # print stats

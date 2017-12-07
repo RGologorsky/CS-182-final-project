@@ -70,17 +70,13 @@ def get_random_neighbor(assignment):
     # del a course to the semester
     return del_to_assignment(assignment, semester_index, randint(0, -1 + len(assignment[semester_index])))
 
-def simulated_annealing(weights, assignment = None):
+def simulated_annealing(weights, assignment = None, T = 1.0, alpha = 0.999, MAX_ITER=5000, MAX_NUM_SIDEWAYS=0):
   start_time = time.time()
 
   curr_state = assignment if assignment else get_random_assignment()
   curr_cost = get_cost(curr_state, weights)
 
   cost_trace = [curr_cost]
-
-  T = 1.0
-  alpha = 0.999
-  MAX_ITER = 5000
 
   for t in xrange(MAX_ITER):
       if int(curr_cost) == 0:
