@@ -80,6 +80,7 @@ def interact():
         res = limited_random_restart(alg, weights, \
                                             MAX_NUM_SIDEWAYS, num_restarts)
         print_user(res)
+        get_costs(res[0],weights,  printing=True)
         print("Hope you liked it!\n")
         
         next_step = ""

@@ -98,51 +98,6 @@ def get_greedy_successor2(assignment, weights):
 
     return (best_successor, min_cost)
 
-# returns lowest cost successor state of given action - add, mutate, delete
-def get_successor_type2(assignment, weights, add_index, del_index, change_type):
-
-    #  add course (type 0), delete course (type 1), muate course (type 2)
-
-    if change_type == 0: # adding a course
-        if len(assignment[add_index]) == 4: # can't add if taking 4 courses
-            return (None, float("inf"))
-
-        possible_courses = new_course_domain(add_index, assignment)
-        possible_assignments = map(lambda x: add_to_assignment(assignment, add_index, x), possible_courses)
-
-        if len(possible_assignments) == 0:
-            return (None, float("inf"))
-
-        assignment_costs = map(lambda x: (x, get_cost(x, weights)), possible_assignments)
-        return min(assignment_costs, key = lambda (x,c): c)
-
-    if change_type == 1: # deleting a course
-        if len(assignment[del_index]) == 0: # can't delete if none
-            return (None, float("inf"))
-
-        # possibilities for the course index to delete.
-        possible_course_indices = range(len(assignment[del_index]))
-        possible_assignments = map(lambda x: del_to_assignment(assignment, del_index, x), possible_course_indices)
-
-        if len(possible_assignments) == 0:
-            return (None, float("inf"))
-
-        assignment_costs = map(lambda x: (x, get_cost(x, weights)), possible_assignments)
-        return min(assignment_costs, key = lambda (x,c): c)
-
-    if change_type == 2: # mutation: = delete from possible deletes, then add
-
-        # for mutation, we get delete states and add over deletes.
-        # possibilities for the course index to delete.
-        possible_course_indices = range(len(assignment[del_index]))
-        if len(possible_course_indices) == 0: # empty assignment
-            return (None, float("inf"))
-
-        possible_assignments = map(lambda x: del_to_assignment(assignment, del_index, x), possible_course_indices)
-
-        add_assignment_costs = map(lambda a: get_successor_type2(a, weights, add_index, -1, 0), possible_assignments)
-        return min(add_assignment_costs, key = lambda (x,c): c)
-
 # we allow sideways movements to overcome plateux
 def sideways_hill_climbing2(weights, MAX_NUM_SIDEWAYS = 100, assignment = None):
     return general_hill_climbing(get_greedy_successor2, weights, MAX_NUM_SIDEWAYS, assignment)
