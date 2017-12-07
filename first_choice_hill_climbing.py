@@ -93,9 +93,10 @@ def get_first_choice_successor2(assignment, weights):
 
     # check mutation: add from any, delete from any (including just add/del)
     randomized_adds = sample(range(-1,8), 9)
-    randomized_dels = sample(range(-1,8), 9)
 
     for add_index in randomized_adds:
+        randomized_dels = sample(range(-1,8), 9)
+
         for del_index in randomized_dels:
             
             if add_index == -1 and del_index == -1:
@@ -124,9 +125,41 @@ def get_first_choice_successor2(assignment, weights):
 
     return (assignment, min_cost)
 
+def get_first_choice_successor1(assignment, weights):
+
+    min_cost = get_cost(assignment, weights)
+
+    # check mutation: add from any, delete from any (including just add/del)
+    randomized_semesters = sample(range(8), 8)
+    successor_functions = [get_first_choice_add_successor, 
+                           get_first_choice_del_successor]
+
+    for semester_index in randomized_semesters:
+
+        randomized_action = sample(range(2), 2)
+
+        for i in randomized_action:
+            successor_function = successor_functions[i]
+
+            successor, cost = \
+                successor_function(assignment, weights, semester_index)
+
+            if cost < min_cost:
+                return successor, cost
+
+    return (assignment, min_cost)
+
+# we allow sideways movements to overcome plateux
+def sideways_first_choice2(weights, MAX_NUM_SIDEWAYS = 100, assignment = None):
+    return general_hill_climbing(get_first_choice_successor2, weights, MAX_NUM_SIDEWAYS, assignment)
+  
+# no sideway steps allowed
+def naive_first_choice2(weights, assignment = None):
+    return sideways_first_choice2(weights, 0, assignment)
+
 # we allow sideways movements to overcome plateux
 def sideways_first_choice(weights, MAX_NUM_SIDEWAYS = 100, assignment = None):
-    return general_hill_climbing(get_first_choice_successor2, weights, MAX_NUM_SIDEWAYS, assignment)
+    return general_hill_climbing(get_first_choice_successor1, weights, MAX_NUM_SIDEWAYS, assignment)
   
 # no sideway steps allowed
 def naive_first_choice(weights, assignment = None):

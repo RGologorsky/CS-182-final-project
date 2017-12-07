@@ -25,10 +25,7 @@ def get_flat_courses(assignment):
 
 def get_cost(assignment, weights):
     cost_list = get_costs(assignment, weights)
-    # print "Cost list", cost_list
-    # print "Weights", weights
     indices = range(len(weights))
-    #print "cost ", sum(map(lambda i: weights[i] * cost_list[i], indices))
 
     return sum(map(lambda i: weights[i] * cost_list[i], indices))
 
@@ -36,6 +33,9 @@ def get_cost(assignment, weights):
 def get_costs(assignment, weights, printing=False):
     courses = get_flat_courses(assignment)
     costs = [0 for _ in range(6)]
+    
+    if len(courses) == 0:
+        return costs
 
     costs[0] = get_prereq_cost(assignment, printing)   if weights[0] != 0 else 0
     costs[1] = get_workload_cost(assignment, printing) if weights[1] != 0 else 0
@@ -163,7 +163,7 @@ def get_q_cost(courses, printing=False):
     if len(courses) > 0:
         avg_q_cost = sum(map(lambda c: 5 - get_feature_cost(c, "Q"), courses))/len(courses)
     else:
-        avg_q_cost = 0
+        return 0
     if printing:
         s = "Avg. Q-Score"
         print "%-25s: %2.2f" % (s, 5- avg_q_cost)
@@ -172,12 +172,15 @@ def get_q_cost(courses, printing=False):
 def get_enrollment_cost(courses, printing=False):
     if len(courses) > 0:
         avg_enrollment = sum(map(lambda c: get_feature_cost(c, "ENROLLMENT"), courses))/len(courses)
-    else:
-        avg_enrollment = 0
+
     if printing:
         s = "Avg. Enrollment"
         print "%-25s: %2.2f" % (s, avg_enrollment)
-    return (avg_enrollment - 20)/STD[NORM_INDICES["ENROLLMENT"]]
+
+    if len(courses) == 0 or avg_enrollment < 50:
+        return 0
+
+    return (avg_enrollment - 50)/STD[NORM_INDICES["ENROLLMENT"]]
 
 # course requirement cost
 # def get_req_cost(assignment):
@@ -210,6 +213,12 @@ def math_cost(courses):
     if len(my_multi_calc) >= 1:
         used_to_satisfy.append(my_multi_calc.pop())
         cost -= 1
+
+    # same sequence cost
+    if len(used_to_satisfy) >= 2:
+        class1 = used_to_satisfy[0]
+        class2 = used_to_satisfy[1]
+        cost += 0.50 * int(class1[0:-1] != class2[0:-1])
 
     #extra = my_lin_alg | my_multi_calc
     #return (cost, used_to_satisfy, extra)

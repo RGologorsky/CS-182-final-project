@@ -47,6 +47,8 @@ def print_cost(assignment):
     th, th_sat  = theory_cost(courses) 
     tb, tb_sat  = technical_and_breadth_cost(courses)
 
+    m = 0 if (m < 1) else m # get rid 0.5 cost for diff seq.
+
     print "============================= CONCENTRATION REQUIREMENTS ======================="
     print "Math             : ", m, ". Classes Taken: ", course_list_to_string(m_sat)
     print "Software         : ", s, ". Classes Taken: ", course_list_to_string(s_sat)

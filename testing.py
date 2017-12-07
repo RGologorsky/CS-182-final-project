@@ -126,11 +126,10 @@ def test_get_successors():
 #     for i in NUM_REPEATS:
 
 
-def compare_naive_algs(file_index):
+def compare_naive_algs(file_index, NUM_REPEATS=20, MAX_NUM_RESTARTS=5):
     # compare avg. costs of sol
-    file_name = "naive_algs" + str(file_index) + ".csv"
+    file_name = "rr_comparison" + str(file_index) + ".csv"
     results = []
-    NUM_REPEATS = 20
 
     weights = get_random_weights()
     assignment = get_random_assignment()
@@ -142,7 +141,7 @@ def compare_naive_algs(file_index):
     NAIVE_ALGS = [naive_hill_climbing, naive_hill_climbing2, 
                     naive_first_choice,
                     simulated_annealing]
-    NAMES = ["Naive HC-1", "Naive HC-2", "Naive FC-2", "SA"]
+    NAMES = ["HC-1", "HC-2", "FC-2", "SA"]
     # for i in range(len(NAMES)):
     #     NAMES[i] = NAMES[i]
 
@@ -157,13 +156,10 @@ def compare_naive_algs(file_index):
     print "all_times: "
     print all_times
 
-    def safely_get_value(i, alg_index):
-        if i >= len(all_cost_traces[alg_index]):
-            return 0
-        return all_cost_traces[alg_index][i]
 
     csv_list = []
     max_num_iter = max(all_num_iter)
+
     for i in xrange(max_num_iter):
         row_dict = {}
         row_dict["Iter"] = i
@@ -188,9 +184,9 @@ def many_compare_naive_algs():
     for i in xrange(3):
         compare_naive_algs(file_index=i)
 
-def compare_random_restarts(file_index):
+def compare_random_restarts(file_index, NUM_TRIALS=20):
     # compare avg. costs of sol
-    file_name = "random_restarts" + str(file_index) + ".csv"
+    file_name = "opt_random_restarts" + str(file_index) + ".csv"
     results = []
     MAX_NUM_RESTARTS = 20
 
@@ -210,7 +206,7 @@ def compare_random_restarts(file_index):
 
 
     for alg in NAIVE_ALGS:
-        (_, cost_trace, num_iter, time_elapsed) = limited_random_restart(alg, weights, assignment, MAX_NUM_RESTARTS)
+        (_, cost_trace, _, time_elapsed) = limited_random_restart(alg, weights, assignment, MAX_NUM_RESTARTS)
 
         all_cost_traces.append(cost_trace)
         all_times.append(time_elapsed)
@@ -219,10 +215,7 @@ def compare_random_restarts(file_index):
     print "all_times: "
     print all_times
 
-    def safely_get_value(i, alg_index):
-        if i >= len(all_cost_traces[alg_index]):
-            return 0
-        return all_cost_traces[alg_index][i]
+    
 
     csv_list = []
     max_num_iter = max(all_num_iter)
