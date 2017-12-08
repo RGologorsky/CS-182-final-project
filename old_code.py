@@ -122,3 +122,104 @@ def get_successor_type2(assignment, weights, semester_index, change_type, curr_c
 
 
 # def honor_req(assignment):
+
+def compare_naive_algs(file_index, NUM_TRIALS=11):
+    # compare avg. costs of sol
+    file_name = "naive_algs" + str(file_index) + ".csv"
+    MAX_NUM_ITER = 5000
+
+
+    NAIVE_ALGS = [naive_hill_climbing, naive_hill_climbing2, 
+                    naive_first_choice, naive_first_choice2,
+                    simulated_annealing]
+    NAMES = ["HC-1", "HC-2", "FC-1", "FC-2", "SA"]
+    NUM_ALGS = len(NAIVE_ALGS)
+    # for i in range(len(NAMES)):
+    #     NAMES[i] = NAMES
+
+    alg_all_avg_cost_traces = [[0 for _ in range(NUM_ALGS)] for _ in range(NUM_TRIALS)]
+    
+    file2 = "times-and-costs" + str(file_index) + ".csv"
+    alg_all_costs = [[-1 for _ in range(NUM_ALGS)] for _ in range(NUM_TRIALS)]
+    alg_all_times = [[-1 for _ in range(NUM_ALGS)] for _ in range(NUM_TRIALS)]
+
+    # get costs and times over different weights & assignments
+    for trial in range(NUM_TRIALS):
+        weights = get_random_weights()
+        assignment = get_random_assignment()
+
+        costs = [0 for _ in range(NUM_ALGS)]
+        times = [0 for _ in range(NUM_ALGS)]
+
+
+        for alg_index in range(NUM_ALGS):  
+            alg = NAIVE_ALGS[alg_index]
+            (_, cost_trace, _, time_elapsed) = \
+                alg(weights, assignment, MAX_NUM_ITER = MAX_NUM_ITER)
+            cost = cost_trace[-1]
+
+            for i in xrange(len(cost_trace)):
+                alg_all_avg_cost_traces[alg_index][i] += cost_trace[i] * 1.0/NUM_TRIALS
+
+            alg_all_costs[trial][alg_index] = cost
+            alg_all_times[trial][alg_index] = time_elapsed
+
+    # for each alg, get minimum, maximum, & median cost/time trace over the trials
+    alg_min_costs = [-1 for _ in range(NUM_ALGS)]
+    alg_max_costs = [-1 for _ in range(NUM_ALGS)]
+    alg_avg_costs = [-1 for _ in range(NUM_ALGS)]
+
+    alg_min_times = [-1 for _ in range(NUM_ALGS)]
+    alg_max_times = [-1 for _ in range(NUM_ALGS)]
+    alg_med_times = [-1 for _ in range(NUM_ALGS)]
+
+    # for each alg, get min, max, and median cost per trial
+    for alg in range(NUM_ALGS):
+        min_costs = [-1 for _ in range(MAX_NUM_ITER)]
+        max_costs = [-1 for _ in range(MAX_NUM_ITER)]
+        med_costs = [-1 for _ in range(MAX_NUM_ITER)]
+
+        min_times = [-1 for _ in range(MAX_NUM_ITER)]
+        max_times = [-1 for _ in range(MAX_NUM_ITER)]
+        med_times = [-1 for _ in range(MAX_NUM_ITER)]
+
+        for i in range(MAX_NUM_ITER):
+            sorted_i_vals = map(lambda trial: safe_cost_lookup(trial, alg, i), \
+                                range(NUM_TRIALS))
+            sorted_i_vals.sort()
+
+            min_costs[i] = sorted_i_vals[1]
+            max_costs[i] = sorted_i_vals[-1]
+            med_costs[i] = sorted_i_vals[NUM_TRIALS/2]        
+
+            sorted_i_vals = map(lambda trial: alg_all_times[trial][alg], \
+                                range(NUM_TRIALS))
+            sorted_i_vals.sort()
+
+            min_times[i] = sorted_i_vals[1]
+            max_times[i] = sorted_i_vals[-1]
+            med_times[i] = sorted_i_vals[NUM_TRIALS/2]
+
+        alg_min_costs[alg] = min_costs
+        alg_max_costs[alg] = max_costs
+        alg_med_costs[alg] = med_costs
+
+        alg_min_times[alg] = min_times
+        alg_max_times[alg] = max_times
+        alg_med_times[alg] = med_times
+
+
+    csv_list = []
+    results = [alg_med_costs, alg_min_costs, alg_max_costs, \
+                alg_med_times, alg_min_times, alg_max_times]
+
+    for i in range(MAX_NUM_ITER):
+        for j in range(len(results)):
+            row_dict = {}
+            title = ["Median-", "Min-", "Max-"][j%3] + ["Cost", "Time"][j/3]
+            for alg_index in xrange(len(NAIVE_ALGS)):
+                title = title + NAMES[alg_index]
+                row_dict[title] = results[j][alg_index][i]
+                csv_list.append(row_dict)
+
+    list_to_csv(csv_list, file_name)

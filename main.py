@@ -54,7 +54,7 @@ def chooose_alg():
     return ALGS[alg_index]
 
 def chooose_num_restarts():
-    s = "Please enter #random restarts (0 = no restarts = 1 alg iter): "
+    s = "Please enter # alg iterations (1 alg iter = no random restarts): "
     num_restarts = None
     while not num_restarts or num_restarts < 1:
         try:
@@ -84,7 +84,7 @@ def interact():
         num_restarts = chooose_num_restarts()
 
         res = limited_random_restart(alg, weights, \
-                                            MAX_NUM_SIDEWAYS, num_restarts)
+                                            MAX_NUM_SIDEWAYS, num_restarts - 1)
         print_user(res)
         get_costs(res[0],weights,  printing=True)
         print("Hope you liked it!\n")

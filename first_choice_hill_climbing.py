@@ -151,11 +151,11 @@ def get_first_choice_successor1(assignment, weights):
 
 # we allow sideways movements to overcome plateux
 def sideways_first_choice2(weights, MAX_NUM_SIDEWAYS = 100, assignment = None):
-    return general_hill_climbing(get_first_choice_successor2, weights, MAX_NUM_SIDEWAYS, assignment)
+    return general_hill_climbing(get_first_choice_successor2, weights, MAX_NUM_SIDEWAYS=MAX_NUM_SIDEWAYS, assignment=assignment)
   
 # no sideway steps allowed
 def naive_first_choice2(weights, assignment = None, MAX_NUM_SIDEWAYS=0):
-    return sideways_first_choice2(weights, 0, assignment)
+    return sideways_first_choice2(weights, MAX_NUM_SIDEWAYS=0, assignment=assignment)
 
 # we allow sideways movements to overcome plateux
 def sideways_first_choice(weights, MAX_NUM_SIDEWAYS = 100, assignment = None):
@@ -163,7 +163,7 @@ def sideways_first_choice(weights, MAX_NUM_SIDEWAYS = 100, assignment = None):
   
 # no sideway steps allowed
 def naive_first_choice(weights, assignment = None, MAX_NUM_SIDEWAYS=0):
-    return sideways_first_choice(weights, 0, assignment)
+    return sideways_first_choice(weights, MAX_NUM_SIDEWAYS=0, assignment=assignment)
 
 # print stats
     # print("First-Choice Algorithm: Initial Cost: {}. Final Cost: {}.\n Assignment:{}".format(initial_cost, curr_cost, assignment))

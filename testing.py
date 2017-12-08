@@ -188,7 +188,7 @@ def many_compare_naive_algs():
     for i in xrange(3):
         compare_naive_algs(file_index=i)
 
-def compare_random_restarts(file_index, NUM_TRIALS=100):
+def compare_random_restarts(file_index, NUM_TRIALS=50):
     # compare avg. costs of sol
     file_name = "random_restarts" + str(file_index) + ".csv"
     results = []
@@ -206,8 +206,6 @@ def compare_random_restarts(file_index, NUM_TRIALS=100):
              "FC-2",
              "SA"]
     NUM_ALGS = len(NAIVE_ALGS)
-    # for i in range(len(NAMES)):
-    #     NAMES[i] = NAMES
 
     # alg_all_costs[alg_index][num_restarts] = [trial 1... trial n] cost values
     alg_all_costs = [[[-1 for _ in range(NUM_TRIALS)] for _ in range(MAX_NUM_RESTARTS)] for _ in range(NUM_ALGS)]
@@ -223,7 +221,7 @@ def compare_random_restarts(file_index, NUM_TRIALS=100):
         for alg_index in range(NUM_ALGS):  
             alg = NAIVE_ALGS[alg_index]
             for i in range(MAX_NUM_RESTARTS):   
-                print "#restarts ", str(i), " testing alg ", NAMES[alg_index]   
+                #print "#restarts ", str(i), " testing alg ", NAMES[alg_index]   
                 (_, cost_trace, _, time_elapsed) = \
                     limited_random_restart(alg, weights, assignment = assignment, \
                                             MAX_NUM_RESTARTS = MAX_NUM_RESTARTS - 1)
@@ -231,20 +229,19 @@ def compare_random_restarts(file_index, NUM_TRIALS=100):
 
                 alg_all_costs[alg_index][i][trial] = cost
                 alg_all_times[alg_index][i][trial] = time_elapsed
-                print "cost ", cost, ", time elapsed: ", time_elapsed
+                #print "cost ", cost, ", time elapsed: ", time_elapsed
                 #pprint(alg_all_costs)
-    pprint(alg_all_costs)
-    #pprint(alg_all_times)
-    # for each alg, get minimum, maximum, & median cost/time trace over the trials
-    # alg_min_costs[alg_index][num restarts] = min cost trial
+    # pprint(alg_all_costs)
     
-    # alg_min_costs = [[-1 for _ in range(MAX_NUM_RESTARTS)] for _ in range(NUM_ALGS)]
+    # for each alg, get median value & std of cost/time trace over the trials
+    # alg_med_costs[alg_index][num restarts] = median cost over the trials
+    # alg_std_costs[alg_index][num restarts] = std of cost over the trials
+    
     alg_med_costs = [[-1 for _ in range(MAX_NUM_RESTARTS)] for _ in range(NUM_ALGS)]
     alg_std_costs = [[-1 for _ in range(MAX_NUM_RESTARTS)] for _ in range(NUM_ALGS)]
 
     alg_med_times = [[-1 for _ in range(MAX_NUM_RESTARTS)] for _ in range(NUM_ALGS)]
     alg_std_times = [[-1 for _ in range(MAX_NUM_RESTARTS)] for _ in range(NUM_ALGS)]
-    # alg_med_times = [[-1 for _ in range(MAX_NUM_RESTARTS)] for _ in range(NUM_ALGS)]
 
     # for each alg, get min, max, and median cost per trial
     for alg_index in range(NUM_ALGS):
@@ -256,36 +253,19 @@ def compare_random_restarts(file_index, NUM_TRIALS=100):
             alg_std_costs[alg_index][i] = numpy.std(costs_arr)
 
             times_arr = numpy.array(alg_all_times[alg_index][i])
-            alg_med_costs[alg_index][i] = numpy.median(times_arr)
-            alg_std_costs[alg_index][i] = numpy.std(times_arr)
-            # sort the trials so that now they are in increasing cost
-            # sorted_i_vals = alg_all_costs[alg_index][i]
-            # sorted_i_vals.sort()
-
-            # alg_min_costs[alg_index][i] = sorted_i_vals[0]
-            # alg_max_costs[alg_index][i] = sorted_i_vals[-1]
-            # alg_med_costs[alg_index][i] = sorted_i_vals[NUM_TRIALS/2]        
-
-            # sorted_i_vals = alg_all_times[alg_index][i]
-            # sorted_i_vals.sort()
-
-            # alg_min_times[alg_index][i] = sorted_i_vals[0]
-            # alg_max_times[alg_index][i] = sorted_i_vals[-1]
-            # alg_med_times[alg_index][i] = sorted_i_vals[NUM_TRIALS/2]
-
+            alg_med_times[alg_index][i] = numpy.median(times_arr)
+            alg_std_times[alg_index][i] = numpy.std(times_arr)
 
     csv_list = []
     results = [alg_med_costs, alg_std_costs, \
                 alg_med_times, alg_std_times]
-    # results = [alg_med_costs, alg_min_costs, alg_max_costs, \
-    #             alg_med_times, alg_min_times, alg_max_times]
-
-    pprint(results)
-    headers = []
+    titles = ["Med-Cost-", "Std-Cost-", "Med-Time-", "Std-Time-"]
+    # pprint(results)
     for i in range(MAX_NUM_RESTARTS):
         row_dict = {}
+        headers = []
         for j in range(len(results)):
-            title = ["Med-", "Std-"][j%2] + ["Cost-", "Time-"][j/2]
+            title = titles[j]
             for alg_index in xrange(len(NAIVE_ALGS)):
                 name = title + NAMES[alg_index]
                 headers.append(name)
@@ -294,116 +274,138 @@ def compare_random_restarts(file_index, NUM_TRIALS=100):
 
     list_to_csv(csv_list, file_name, headers)
 
-def safe_cost_lookup(trial, alg, i):
-            if i < len(alg_all_costs[trial][alg]):
-                return alg_all_costs[trial][alg][i]
-            return 0
+# many_compare_naive_algs()
+# compare_random_restarts(file_index=7)
+#compare_naive_algs(file_index=5)
 
-def compare_naive_algs(file_index, NUM_TRIALS=11):
+def compare_cost_traces(file_index, NUM_TRIALS=50):
+    print "in compare cost traces"
     # compare avg. costs of sol
-    file_name = "naive_algs" + str(file_index) + ".csv"
-    MAX_NUM_ITER = 5000
+    file_name = "compare_cost_traces" + str(file_index) + ".csv"
+    results = []
 
 
-    NAIVE_ALGS = [naive_hill_climbing, naive_hill_climbing2, 
+    NAIVE_ALGS = [naive_hill_climbing, naive_hill_climbing2,
                     naive_first_choice, naive_first_choice2,
                     simulated_annealing]
-    NAMES = ["HC-1", "HC-2", "FC-1", "FC-2", "SA"]
+    NAMES = ["HC-1", "HC-2",
+            "FC-1", "FC-2",  
+            "SA"]
+
     NUM_ALGS = len(NAIVE_ALGS)
-    # for i in range(len(NAMES)):
-    #     NAMES[i] = NAMES
 
-    alg_all_avg_cost_traces = [[0 for _ in range(NUM_ALGS)] for _ in range(NUM_TRIALS)]
-    
-    file2 = "times-and-costs" + str(file_index) + ".csv"
-    alg_all_costs = [[-1 for _ in range(NUM_ALGS)] for _ in range(NUM_TRIALS)]
-    alg_all_times = [[-1 for _ in range(NUM_ALGS)] for _ in range(NUM_TRIALS)]
+    alg_avg_cost_traces = [[] for _ in range(NUM_ALGS)]
+    max_num_iter = -1
 
-    # get costs and times over different weights & assignments
+    # get avg. cost trace over different weights & assignments
+    # alg_avg_cost_traces[i] = avg. cost trace of alg i over the trials
     for trial in range(NUM_TRIALS):
+        print "in trial ", trial
         weights = get_random_weights()
         assignment = get_random_assignment()
 
-        costs = [0 for _ in range(NUM_ALGS)]
-        times = [0 for _ in range(NUM_ALGS)]
-
-
-        for alg_index in range(NUM_ALGS):  
+        # alg_avg_cost_trace[alg_index] = [c1 ... cn] avg cost values on iter i
+        
+        # find avg_cost_trace
+        for alg_index in range(NUM_ALGS):
             alg = NAIVE_ALGS[alg_index]
-            (_, cost_trace, _, time_elapsed) = \
-                alg(weights, assignment, MAX_NUM_ITER = MAX_NUM_ITER)
-            cost = cost_trace[-1]
+        
+            #print "#restarts ", str(i), " testing alg ", NAMES[alg_index]   
+            (_, cost_trace, num_iter, _) = \
+                alg(weights, assignment = assignment)
+            max_num_iter = max(num_iter, max_num_iter)
 
-            for i in xrange(len(cost_trace)):
-                alg_all_avg_cost_traces[alg_index][i] += cost_trace[i] * 1.0/NUM_TRIALS
+            avg_cost_trace = map(lambda c: c*1.0/NUM_TRIALS, cost_trace)
 
-            alg_all_costs[trial][alg_index] = cost
-            alg_all_times[trial][alg_index] = time_elapsed
+            if len(alg_avg_cost_traces[alg_index]) == 0:
+                alg_avg_cost_traces[alg_index] = avg_cost_trace
+            else:
+                for i in range(len(avg_cost_trace)):
+                    if i < len(alg_avg_cost_traces[alg_index]):
+                        alg_avg_cost_traces[alg_index][i] += avg_cost_trace[i]
+                    else:
+                        alg_avg_cost_traces[alg_index].append(avg_cost_trace[i])
 
-    # for each alg, get minimum, maximum, & median cost/time trace over the trials
-    alg_min_costs = [-1 for _ in range(NUM_ALGS)]
-    alg_max_costs = [-1 for _ in range(NUM_ALGS)]
-    alg_avg_costs = [-1 for _ in range(NUM_ALGS)]
-
-    alg_min_times = [-1 for _ in range(NUM_ALGS)]
-    alg_max_times = [-1 for _ in range(NUM_ALGS)]
-    alg_med_times = [-1 for _ in range(NUM_ALGS)]
-
-    # for each alg, get min, max, and median cost per trial
-    for alg in range(NUM_ALGS):
-        min_costs = [-1 for _ in range(MAX_NUM_ITER)]
-        max_costs = [-1 for _ in range(MAX_NUM_ITER)]
-        med_costs = [-1 for _ in range(MAX_NUM_ITER)]
-
-        min_times = [-1 for _ in range(MAX_NUM_ITER)]
-        max_times = [-1 for _ in range(MAX_NUM_ITER)]
-        med_times = [-1 for _ in range(MAX_NUM_ITER)]
-
-        for i in range(MAX_NUM_ITER):
-            sorted_i_vals = map(lambda trial: safe_cost_lookup(trial, alg, i), \
-                                range(NUM_TRIALS))
-            sorted_i_vals.sort()
-
-            min_costs[i] = sorted_i_vals[1]
-            max_costs[i] = sorted_i_vals[-1]
-            med_costs[i] = sorted_i_vals[NUM_TRIALS/2]        
-
-            sorted_i_vals = map(lambda trial: alg_all_times[trial][alg], \
-                                range(NUM_TRIALS))
-            sorted_i_vals.sort()
-
-            min_times[i] = sorted_i_vals[1]
-            max_times[i] = sorted_i_vals[-1]
-            med_times[i] = sorted_i_vals[NUM_TRIALS/2]
-
-        alg_min_costs[alg] = min_costs
-        alg_max_costs[alg] = max_costs
-        alg_med_costs[alg] = med_costs
-
-        alg_min_times[alg] = min_times
-        alg_max_times[alg] = max_times
-        alg_med_times[alg] = med_times
-
-
+    pprint(alg_avg_cost_traces)
+    # turn alg_avg_cost_traces into a csv 
     csv_list = []
-    results = [alg_med_costs, alg_min_costs, alg_max_costs, \
-                alg_med_times, alg_min_times, alg_max_times]
+    for i in xrange(max_num_iter):
+        row_dict = {}
+        for alg_index in range(NUM_ALGS):
+            avg_cost_trace = alg_avg_cost_traces[alg_index]
+            alg_name = NAMES[alg_index]
+            if i < len(avg_cost_trace):
+                row_dict[alg_name] = avg_cost_trace[i]
+        csv_list.append(row_dict)
+    list_to_csv(csv_list, file_name, headers=None)
 
-    for i in range(MAX_NUM_ITER):
-        for j in range(len(results)):
-            row_dict = {}
-            title = ["Median-", "Min-", "Max-"][j%3] + ["Cost", "Time"][j/3]
-            for alg_index in xrange(len(NAIVE_ALGS)):
-                title = title + NAMES[alg_index]
-                row_dict[title] = results[j][alg_index][i]
-                csv_list.append(row_dict)
-
-    list_to_csv(csv_list, file_name)
-# many_compare_naive_algs()
-compare_random_restarts(file_index=5)
-#compare_naive_algs(file_index=5)
+# compare_cost_traces(file_index=11,NUM_TRIALS=50)
 # result = limited_random_restart(sideways_first_choice, weights, MAX_NUM_SIDEWAYS, MAX_NUM_RESTARTS)
 # print result
 
 # result = limited_random_restart(simulated_annealing, weights, MAX_NUM_SIDEWAYS, MAX_NUM_RESTARTS)
 # print result
+
+def compare_repeated_cost_traces(file_index, NUM_TRIALS=2, MAX_NUM_RESTARTS=5):
+    print "in repeated compare cost traces"
+
+    # compare avg. costs of sol
+    file_name = "repeated_compare_cost_traces" + str(file_index) + ".csv"
+    results = []
+
+
+    NAIVE_ALGS = [naive_hill_climbing, naive_hill_climbing2,
+                    naive_first_choice, naive_first_choice2,
+                    simulated_annealing]
+    NAMES = ["HC-1", "HC-2",
+            "FC-1", "FC-2",  
+            "SA"]
+
+    NUM_ALGS = len(NAIVE_ALGS)
+
+    alg_avg_cost_traces = [[] for _ in range(NUM_ALGS)]
+    max_num_iter = -1
+
+    # get avg. cost trace over different weights & assignments
+    # alg_avg_cost_traces[i] = avg. cost trace of alg i over the trials
+    for trial in range(NUM_TRIALS):
+        print "in trial ", trial
+        weights = get_random_weights()
+        assignment = get_random_assignment()
+
+        # alg_avg_cost_trace[alg_index] = [c1 ... cn] avg cost values on iter i
+        
+        # find avg_cost_trace
+        for alg_index in range(NUM_ALGS):
+            alg = NAIVE_ALGS[alg_index]
+        
+            #print "#restarts ", str(i), " testing alg ", NAMES[alg_index]   
+            (_, cost_trace, num_iter, _) = \
+                limited_random_restart(alg, weights, assignment = assignment, MAX_NUM_RESTARTS = MAX_NUM_RESTARTS)
+            max_num_iter = max(num_iter, max_num_iter)
+
+            avg_cost_trace = map(lambda c: c*1.0/NUM_TRIALS, cost_trace)
+
+            if len(alg_avg_cost_traces[alg_index]) == 0:
+                alg_avg_cost_traces[alg_index] = avg_cost_trace
+            else:
+                for i in range(len(avg_cost_trace)):
+                    if i < len(alg_avg_cost_traces[alg_index]):
+                        alg_avg_cost_traces[alg_index][i] += avg_cost_trace[i]
+                    else:
+                        alg_avg_cost_traces[alg_index].append(avg_cost_trace[i])
+
+    pprint(alg_avg_cost_traces)
+    # turn alg_avg_cost_traces into a csv 
+    csv_list = []
+    for i in xrange(max_num_iter):
+        row_dict = {}
+        for alg_index in range(NUM_ALGS):
+            avg_cost_trace = alg_avg_cost_traces[alg_index]
+            alg_name = NAMES[alg_index]
+            if i < len(avg_cost_trace):
+                row_dict[alg_name] = avg_cost_trace[i]
+        csv_list.append(row_dict)
+    list_to_csv(csv_list, file_name, headers=None)
+
+compare_repeated_cost_traces(file_index=20,NUM_TRIALS=20,MAX_NUM_RESTARTS=9)

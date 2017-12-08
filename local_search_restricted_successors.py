@@ -120,12 +120,14 @@ def general_hill_climbing(successor_fun, weights, MAX_NUM_SIDEWAYS = 100, assign
 
 
 def sideways_hill_climbing(weights, MAX_NUM_SIDEWAYS = 100, assignment = None):
-    return general_hill_climbing(get_greedy_successor, weights, MAX_NUM_SIDEWAYS, assignment)
+    return general_hill_climbing(get_greedy_successor, weights, MAX_NUM_SIDEWAYS=MAX_NUM_SIDEWAYS, assignment=assignment)
   
 # no sideway steps allowed
 def naive_hill_climbing(weights, assignment = None, MAX_NUM_SIDEWAYS=0):
     # print "in naive hill climbing"
-    return sideways_hill_climbing(weights, 0, assignment)
+    #print weights, assignment, MAX_NUM_SIDEWAYS
+    #print "Done"
+    return sideways_hill_climbing(weights, MAX_NUM_SIDEWAYS=0, assignment=assignment)
 
 # print stats
 # print("Local Search Algorithm: Initial Cost: {}. Final Cost: {}.\n Assignment:{}".format(initial_cost, curr_cost, assignment))

@@ -36,7 +36,7 @@ def limited_random_restart(alg, weights, MAX_NUM_SIDEWAYS=100, MAX_NUM_RESTARTS=
 
     while num_restarts < MAX_NUM_RESTARTS and best_cost != 0:
         #print "Iter %d: cost = %f" % (num_iter, best_cost)
-        state,indiv_cost_trace, indiv_num_iter, indiv_time_elapsed = alg(weights, MAX_NUM_SIDEWAYS)
+        state,indiv_cost_trace, indiv_num_iter, indiv_time_elapsed = alg(weights, MAX_NUM_SIDEWAYS=MAX_NUM_SIDEWAYS)
         cost = indiv_cost_trace[-1]
         #print "cost, ", cost_trace
 
