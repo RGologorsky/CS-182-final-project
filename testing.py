@@ -14,7 +14,7 @@ from printing import *
 from pprint import pprint
 from csv_parser import list_to_csv
 from copy import deepcopy
-import numpy
+import numpy as np
 
 # pre-req, workload, qscore, enrollemnt
 #weights = [20, 5, 5, 0]
@@ -188,6 +188,9 @@ def many_compare_naive_algs():
     for i in xrange(3):
         compare_naive_algs(file_index=i)
 
+def get_iqr(data):
+    return np.percentile(data, 75) - np.percentile(data, 25)
+
 def compare_random_restarts(file_index, NUM_TRIALS=50):
     # compare avg. costs of sol
     file_name = "random_restarts" + str(file_index) + ".csv"
@@ -247,19 +250,19 @@ def compare_random_restarts(file_index, NUM_TRIALS=50):
     for alg_index in range(NUM_ALGS):
 
         for i in range(MAX_NUM_RESTARTS):
-            # calculate the std of the trials
-            costs_arr = numpy.array(alg_all_costs[alg_index][i])
-            alg_med_costs[alg_index][i] = numpy.median(costs_arr)
-            alg_std_costs[alg_index][i] = numpy.std(costs_arr)
+            # calculate the IQR of the trials
+            costs_arr = np.array(alg_all_costs[alg_index][i])
+            alg_med_costs[alg_index][i] = np.median(costs_arr)
+            alg_std_costs[alg_index][i] = get_iqr(costs_arr)
 
-            times_arr = numpy.array(alg_all_times[alg_index][i])
-            alg_med_times[alg_index][i] = numpy.median(times_arr)
-            alg_std_times[alg_index][i] = numpy.std(times_arr)
+            times_arr = np.array(alg_all_times[alg_index][i])
+            alg_med_times[alg_index][i] = np.median(times_arr)
+            alg_std_times[alg_index][i] = get_iqr(times_arr)
 
     csv_list = []
     results = [alg_med_costs, alg_std_costs, \
                 alg_med_times, alg_std_times]
-    titles = ["Med-Cost-", "Std-Cost-", "Med-Time-", "Std-Time-"]
+    titles = ["Med-Cost-", "IQR-Cost-", "Med-Time-", "IQR-Time-"]
     # pprint(results)
     for i in range(MAX_NUM_RESTARTS):
         row_dict = {}
@@ -275,7 +278,7 @@ def compare_random_restarts(file_index, NUM_TRIALS=50):
     list_to_csv(csv_list, file_name, headers)
 
 # many_compare_naive_algs()
-# compare_random_restarts(file_index=7)
+compare_random_restarts(file_index=25, NUM_TRIALS=100)
 #compare_naive_algs(file_index=5)
 
 def compare_cost_traces(file_index, NUM_TRIALS=50):
@@ -339,7 +342,7 @@ def compare_cost_traces(file_index, NUM_TRIALS=50):
         csv_list.append(row_dict)
     list_to_csv(csv_list, file_name, headers=None)
 
-# compare_cost_traces(file_index=11,NUM_TRIALS=50)
+#compare_cost_traces(file_index=11,NUM_TRIALS=50)
 # result = limited_random_restart(sideways_first_choice, weights, MAX_NUM_SIDEWAYS, MAX_NUM_RESTARTS)
 # print result
 
@@ -408,4 +411,4 @@ def compare_repeated_cost_traces(file_index, NUM_TRIALS=2, MAX_NUM_RESTARTS=5):
         csv_list.append(row_dict)
     list_to_csv(csv_list, file_name, headers=None)
 
-compare_repeated_cost_traces(file_index=20,NUM_TRIALS=20,MAX_NUM_RESTARTS=9)
+#compare_repeated_cost_traces(file_index=20,NUM_TRIALS=20,MAX_NUM_RESTARTS=9)
